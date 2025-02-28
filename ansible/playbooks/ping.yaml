@@ -1,0 +1,8 @@
+---
+- name: Ping all devices in the topology
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Ping devices
+      cisco.ios.ios_ping:
+        dest: "{{ ansible_host }}"

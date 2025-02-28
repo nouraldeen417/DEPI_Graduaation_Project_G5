@@ -1,0 +1,37 @@
+---
+# tasks file for get_facts
+- name: Gather all facts
+  ios_facts:
+    gather_subset: all
+  register: current_users
+  tags: always
+- name: Run 'show ip route' command
+  cisco.ios.ios_command:
+    commands:
+      - show ip route
+  register: routing_table
+  tags: routers 
+- name: Save combined facts to a JSON file
+  copy:
+    content: >-
+      {{
+        ansible_facts | combine({'routing_table': routing_table}) | to_nice_json
+      }}
+    dest: "./temp/router_facts_{{ inventory_hostname }}.json"
+  tags: routers
+
+- name: Run 'show vlan breif' command
+  cisco.ios.ios_command:
+    commands:
+      - show vlan brief
+  register: vlan_table
+  tags: switches
+
+- name: Save combined facts to a JSON file
+  copy:
+    content: >-
+      {{
+        ansible_facts | combine({'vlans': vlan_table}) | to_nice_json
+      }}
+    dest: "./temp/switch_facts_{{ inventory_hostname }}.json"
+  tags: switches

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'CSS/hello.css' %}"></head>
+</head>
+<body>
+    <div class="navbar">
+        <div class="links">
+            <a href="{% url 'sayhello' %}">Home</a>
+            <a href="{% url 'RoutersView' %}">Routers</a>
+            <a href="{% url 'SwitchesView' %}">Switches</a>
+            <a href="{% url 'FirewallView' %}">Add Device</a>
+            {% if request.user.is_staff %}
+            <a href="{% url 'approve_users' %}">Pending Users</a>
+            {% endif %}
+        </div>
+
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h1>Welcome to Network Management System</h1>
+        </div>
+
+        <h2>System Status</h2>
+        <table id="deviceTable">
+            <thead>
+                <tr>
+                    <th>Host</th>
+                    <th>Task</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be dynamically added here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="{% static 'js/hello_script.js' %}"></script>
+</body>
+</html>

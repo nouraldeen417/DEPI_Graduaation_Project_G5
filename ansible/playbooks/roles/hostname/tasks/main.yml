@@ -1,0 +1,5 @@
+---
+- name: SET Host Name
+  cisco.ios.ios_hostname:
+   config:
+    hostname: "{{ new_hostname }}"

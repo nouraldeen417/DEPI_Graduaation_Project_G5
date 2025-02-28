@@ -1,0 +1,8 @@
+---
+# handlers file for roles/interfaces
+- name: set interface up
+  cisco.ios.ios_interfaces:
+    config:
+    - name: "{{interfaces}}"
+      description: Configured and Merged by Ansible Network
+      enabled: true

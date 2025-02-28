@@ -1,0 +1,7 @@
+---
+- name: Configure IOS devices
+  hosts: "{{ target_hosts }}"
+  gather_facts: false
+  roles:
+    - role: ping 
+    - role: device_facts

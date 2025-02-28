@@ -1,0 +1,28 @@
+---
+# tasks file for static_routing
+- name: Add a static route
+  cisco.ios.ios_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes:
+              - dest: "{{ item }}"
+                next_hops:
+                  - forward_router_address: "{{ next_hop }}"
+                    distance_metric: "{{ admin_distance }}"
+    state: merged
+  loop: "{{ cidr_list }}"  
+  tags: add_configration     
+
+- name: Add a static route
+  cisco.ios.ios_static_routes:
+    config:
+      - address_families:
+          - afi: ipv4
+            routes:
+              - dest: "{{ item }}"
+                next_hops:
+                  - forward_router_address: "{{ next_hop }}"
+    state: deleted
+  loop: "{{ cidr_list }}"  
+  tags: remove_configration

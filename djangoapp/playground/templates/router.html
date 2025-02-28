@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Information</title>
+    {%load static%}
+    <link rel="stylesheet" href="{% static 'CSS/router.css' %}"></head>
+<body>
+    <div class="navbar">
+        <div class="links">
+            <a href="{% url 'sayhello' %}">Home</a>
+            <a href="{% url 'RoutersView' %}">Routers</a>
+            <a href="{% url 'SwitchesView' %}">Switches</a>
+            <a href="{% url 'FirewallView' %}">Add Device</a>
+            {% if request.user.is_staff %}
+            <a href="{% url 'approve_users' %}">Pending Users</a>
+            {% endif %}
+        </div>
+
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <!-- Device Selection -->
+        <div class="device-selection">
+            <label for="device-select">Select Device:</label>
+            <select id="device-select">
+            </select>
+            <button id="configure-btn">Configure</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tablink active" onclick="openTab('interfaces')">Interfaces</button>
+            <button class="tablink" onclick="openTab('neighbors')">Neighbors</button>
+            <button class="tablink" onclick="openTab('routing-table')">Routing Table</button>
+        </div>
+
+        <!-- Interfaces Section -->
+        <div id="interfaces" class="tabcontent">
+            <h3>Interfaces</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>IP Address</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="interfaces-table">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Neighbors Section -->
+        <div id="neighbors" class="tabcontent">
+            <h3>Neighbors</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Device</th>
+                        <th>Interface</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody id="neighbors-table">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Routing Table Section -->
+        <div id="routing-table" class="tabcontent">
+            <h3>Routing Table</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>Network</th>
+                        <th>Protocol</th>
+                        <th>next_hop</th>
+                        <th>admin_distance</th>
+                    </tr>
+                </thead>
+                <tbody id="routing-table-body">
+                    <!-- Data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src={% static 'js/router.js' %} defer></script>
+</body>
+</html>

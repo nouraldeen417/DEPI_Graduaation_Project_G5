@@ -1,0 +1,20 @@
+---
+- name: Set interface ipv4
+  cisco.ios.ios_l3_interfaces:
+    config:
+    - name: "{{interfaces}}"
+      ipv4:
+        - address: "{{ipv4}}"
+    state: merged    
+  notify: set interface up  # Notify the handler
+  tags: add_configration
+
+- name: delete interface ipv4
+  cisco.ios.ios_l3_interfaces:
+    config:
+    - name: "{{interfaces}}"
+      ipv4:
+        - address: "{{ipv4}}"
+    state: deleted
+  tags: remove_configration
+

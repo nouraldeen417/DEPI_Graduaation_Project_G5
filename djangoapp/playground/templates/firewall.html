@@ -1,0 +1,161 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firewall Page</title>
+    {% load static %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color:  #f9f9f9;
+            color: #333;
+        }
+        tr {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ccc;
+            padding: 10px 20px;
+            border-radius: 15px; /* Adds the curved edges */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 10px; /* Adds space around the navbar */
+        }
+    
+        .navbar .links {
+            display: flex;
+            gap: 20px;
+        }
+    
+        .navbar a {
+            text-decoration: none;
+            color: #000;
+            padding: 8px 15px;
+            border-radius: 10px; /* Adds rounded corners to the links */
+            background-color: lightblue;
+            transition: background-color 0.3s, color 0.3s;
+        }
+    
+        .navbar a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+    
+        .logout-btn {
+            background-color: #f44336; /* Red color */
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: #d32f2f; /* Darker red on hover */
+            transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+        button {
+            padding: 8px 15px;
+            margin: 0 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .container {
+            margin: 20px;
+            padding: 20px;
+            background-color: #add8e6; /* Original light blue background */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar"> 
+        <div><a href="{% url 'sayhello' %}">Home</a></div>
+        <div><a href="{% url 'RoutersView' %}">Routers</a></div>
+        <div><a href="{% url 'SwitchesView' %}">Switches</a></div>
+        <div><a href="{% url 'FirewallView' %}">Add Device</a></div>
+        {% if request.user.is_staff %}
+        <div><a href="{% url 'approve_users' %}">Pending Users</a></div>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <!-- Styled Logout button -->
+        <div>
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <center><h2>List all running Firewalls</h2></center>
+        <table id="firewall-table" border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>IP Address</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <!-- firewalls data will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+        <h2>Running Firewalls Checklist</h2>
+        <form id="firewalls-form" action="{% url 'FirewallDoWork' %}" method="Post">
+            {% csrf_token %}
+            <ul id="running-firewalls-checklist">
+                <!-- Checklist of running firewalls will be inserted here by JavaScript -->
+            </ul>
+            <button type="submit">Submit Selected Firewalls</button>
+        </form>
+        <div id="message-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <p>Allow user to select firewall and display running configuration</p>
+        <p>Allow to change some configuration</p>
+    </div>
+    
+    <script src="{% static 'js/script.js' %}" defer></script>
+</body>
+</html>

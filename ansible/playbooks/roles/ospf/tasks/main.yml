@@ -1,0 +1,59 @@
+---
+#tasks file for ospf
+- name: Configure OSPF process and router ID
+  cisco.ios.ios_ospfv2:
+    config:
+      processes:
+        - process_id: "{{ ospf_process_id }}"
+          router_id: "{{ router_id }}"
+          network:
+            - address: "{{ item.network }}"
+              wildcard_bits: "{{ item.wildcard }}"
+              area: "{{ area_id }}"
+    state: merged
+  loop: "{{ network_data }}"
+  tags: add_configration            
+- name: Configure OSPF on the interface
+  cisco.ios.ios_ospf_interfaces:
+    config:
+      - name: "{{ interface_name }}"
+        address_family:
+          - afi: ipv4
+            process:
+              id: "{{ ospf_process_id }}"
+              area_id: "{{ area_id }}"
+            hello_interval: "{{ hello_timer }}"
+            dead_interval:
+              time: "{{ dead_timer }}"
+
+    state: merged
+  tags: add_configration
+
+- name: delete OSPF process and router ID
+  cisco.ios.ios_ospfv2:
+    config:
+      processes:
+        - process_id: "{{ ospf_process_id }}"
+          router_id: "{{ router_id }}"
+          network:
+            - address: "{{ item.network }}"
+              wildcard_bits: "{{ item.wildcard }}"
+              area: "{{ area_id }}"
+    state: deleted
+  loop: "{{ network_data }}"
+  tags: remove_configration 
+
+- name: Remove OSPF process
+  cisco.ios.ios_ospfv2:
+    config:
+      processes:
+        - process_id: "{{ ospf_process_id }}"
+    state: deleted
+  tags: remove_ospf
+- name: Remove OSPF from interfaces
+  cisco.ios.ios_ospf_interfaces:
+    config:
+      - name: "{{ interface_name }}"
+
+    state: deleted
+  tags: remove_ospf

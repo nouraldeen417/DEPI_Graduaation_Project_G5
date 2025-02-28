@@ -1,0 +1,19 @@
+[all:vars]
+#############Edit this section if all variable common for all devices#################
+# ansible_connection=ansible.netcommon.network_cli
+# ansible_become=yes
+# ansible_become_method=enable
+# ansible_network_os=cisco.ios.ios
+# ansible_user=ansible
+# ansible_password=123
+
+[routers]
+# router1 ansible_host=192.168.1.1 ansible_user=cisco ansible_password=cisco ansible_network_os=ios
+# router2 ansible_host=192.168.1.2 ansible_user=cisco ansible_password=cisco ansible_network_os=ios
+
+
+[switches]
+# Switche1 ansible_host=192.168.2.100
+
+
+# Edit this file to match your Cisco devices before running the setup script.

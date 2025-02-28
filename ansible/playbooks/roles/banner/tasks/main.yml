@@ -1,0 +1,6 @@
+---
+- name: Configure banner from file
+  cisco.ios.ios_banner:
+    banner: motd
+    text: "{{ new_banner }}"  # Use unix formatted text files (LF not CRLF) to avoid idempotency issues.
+

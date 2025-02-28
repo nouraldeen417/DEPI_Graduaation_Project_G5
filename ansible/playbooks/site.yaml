@@ -1,0 +1,11 @@
+- name: Configure IOS devices
+  hosts: all
+  gather_facts: false
+  roles:
+    - { role: hostname  , when: "'hostname' in selected_roles"        }
+    - { role: banner    , when: "'banner' in selected_roles"          }
+    - { role: ip_config , when: "'ip_config' in selected_roles"       }
+    - { role: interfaces, when: "'interface-state' in selected_roles" }
+    - { role: ospf      , when: "'ospf' in selected_roles"            }
+    - { role: static_routing      , when: "'static_routing' in selected_roles"            }
+    - { role: vlans      , when: "'vlan' in selected_roles"            }

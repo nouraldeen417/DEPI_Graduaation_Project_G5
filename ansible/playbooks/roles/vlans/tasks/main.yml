@@ -1,0 +1,56 @@
+---
+- name: create VLAN {{ vlan_id }}
+  cisco.ios.ios_vlans:
+    config:
+      - vlan_id: "{{ vlan_id }}"
+        name: "{{ vlan_name }}"
+        state: active
+        shutdown: disabled
+    state: merged
+  tags: add_configration
+- name: assign interfaces to VLAN {{ vlan_id }}
+  cisco.ios.ios_l2_interfaces:
+    config:
+      - name: "{{ item  }}"
+        mode: access
+        access:
+          vlan: "{{ vlan_id }}"
+    state: merged
+  loop: "{{ vlan_interfaces }}"
+  tags: add_configration
+
+- name: Delete attributes of given VLANs
+  cisco.ios.ios_vlans:
+    config:
+      - vlan_id: "{{ vlan_id }}"
+    state: deleted
+  tags: remove_configration
+- name: delete interfaces from VLAN {{ vlan_id }}
+  cisco.ios.ios_l2_interfaces:
+    config:
+      - name: "{{ item  }}"
+        mode: access
+        access:
+          vlan: "{{ vlan_id }}"
+    state: deleted
+  loop: "{{ vlan_interfaces }}"
+  tags: remove_configration 
+- name: Remove VLAN interface (Vlan{{ vlan_id }})
+  cisco.ios.ios_config:
+    lines:
+      - "no interface Vlan{{ vlan_id }}"
+  tags: remove_configration
+
+
+
+# - name: add IP address on VLAN interface
+#   cisco.ios.ios_l3_interfaces:
+#     config:
+#       - name: "Vlan{{ vlan_id }}"
+#         ipv4:
+#           - address: "{{ vlan_ip }}/{{ vlan_subnet }}"
+#     state: merged
+
+    # - name: Save configuration
+    #   cisco.ios.ios_config:
+    #     save_when: modified

@@ -1,0 +1,12 @@
+
+PLAY [Ping all devices in the topology] ****************************************
+
+TASK [Ping devices] ************************************************************
+[0;32mok: [Router_01][0m
+[0;32mok: [Router_02][0m
+[0;32mok: [Switch_01][0m
+
+PLAY RECAP *********************************************************************
+[0;32mRouter_01[0m                  : [0;32mok=1   [0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[0;32mRouter_02[0m                  : [0;32mok=1   [0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[0;32mSwitch_01[0m                  : [0;32mok=1   [0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

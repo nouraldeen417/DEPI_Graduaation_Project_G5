@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approve Users</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .navbar .links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 6px;
+            background-color: #e8f4ff;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            background-color: #007bff;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .logout-btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff6b81;
+            transform: translateY(-1px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2d3436;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 20px 0;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #e8f4ff;
+            font-weight: 600;
+            color: #2d3436;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #f1f7ff;
+            transition: background-color 0.3s ease;
+        }
+
+        button[name="action"] {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+
+        button[name="action"][value="approve"] {
+            background-color: #007bff;
+            color: white;
+        }
+
+        button[name="action"][value="approve"]:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        button[name="action"][value="reject"] {
+            background-color: #ff4757;
+            color: white;
+        }
+
+        button[name="action"][value="reject"]:hover {
+            background-color: #ff6b81;
+            transform: translateY(-1px);
+        }
+
+        .no-users-message {
+            text-align: center;
+            color: #2d3436;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .navbar .links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="links">
+            <a href="{% url 'sayhello' %}">Home</a>
+            <a href="{% url 'RoutersView' %}">Routers</a>
+            <a href="{% url 'SwitchesView' %}">Switches</a>
+            <a href="{% url 'FirewallView' %}">Add Device</a>
+            {% if request.user.is_staff %}
+            <a href="{% url 'approve_users' %}">Pending Users</a>
+            {% endif %}
+        </div>
+
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <h1>Approve Pending Users</h1>
+        {% if pending_users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in pending_users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <button type="submit" name="action" value="approve">Approve</button>
+                        </form>
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <button type="submit" name="action" value="reject">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-users-message">
+            <p>No users are waiting for approval.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
