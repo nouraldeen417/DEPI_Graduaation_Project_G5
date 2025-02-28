@@ -1,11 +1,11 @@
 
 services:
   web:
-    image: networkapp:0 
+    image: nouraldeen152/networkapp:${BUILD_NUMBER} 
     ports:
       - "8000:8000"
     volumes:
-      - staticfiles:/app/Storefront/staticfiles  # Mount staticfiles volume
+      - staticfiles:/app/djangoapp/staticfiles  # Mount staticfiles volume
     environment:
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 

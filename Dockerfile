@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Change the working directory to the Django app subdirectory
-WORKDIR /app/Storefront
+WORKDIR /app/djangoapp
 
 # Collect static files
 RUN python manage.py collectstatic --noinput

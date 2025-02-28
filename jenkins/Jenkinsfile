@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('build docker image') {
+            steps {
+                    sh "ls -l"
+                    sh "docker build -t networkapp:$BUILD_NUMBER .   "
+                    sh "ls -l && pwd"
+                    echo 'optional push images in my public regitry '
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]) 
+                {
+                    sh 'docker login -u $USER -p $PASS\
+                     && docker tag networkapp:$BUILD_NUMBER nouraldeen152/networkapp:$BUILD_NUMBER\
+                     && docker push nouraldeen152/networkapp:$BUILD_NUMBER '
+                }
+            }
+        }       
+        stage('test') {
+            steps {
+                sh "echo test stage"
+            }
+        }
+        stage('deploy') {
+            steps {
+                    // Ensure BUILD_NUMBER is available for docker-compose
+                    sh "BUILD_NUMBER=${BUILD_NUMBER} docker-compose up -d"
+            }
+        }
+    }
+}
