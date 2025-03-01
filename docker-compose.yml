@@ -10,7 +10,7 @@ services:
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 
   nginx:
-    image: nginx_custom:0
+    image: nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER} 
     ports:
       - "80:80"
     volumes:

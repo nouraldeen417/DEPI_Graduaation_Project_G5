@@ -14,14 +14,16 @@ pipeline {
                 
                     sh "ls -l"
                     sh "docker build -t networkapp:$BUILD_NUMBER .   "
-                    sh "cd nginx && docker build -t nginx_custom:0 .   "
+                    sh "cd nginx && docker build -t nginx_custom:$BUILD_NUMBER .   "
                     sh "ls -l && pwd"
-                    echo 'optional push images in my public regitry '
+                    echo 'push images in my public regitry '
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]) 
                 {
                     sh 'docker login -u $USER -p $PASS\
                      && docker tag networkapp:$BUILD_NUMBER nouraldeen152/networkapp:$BUILD_NUMBER\
-                     && docker push nouraldeen152/networkapp:$BUILD_NUMBER '
+                     && docker tag nginx_custom:$BUILD_NUMBER nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER}\
+                     && docker push nouraldeen152/networkapp:$BUILD_NUMBER \
+                     && docker push nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER} '
                 }
             }
         }       
