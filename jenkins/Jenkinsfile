@@ -1,6 +1,13 @@
 pipeline {
     agent any
-
+    environment {
+        DOCKER_REGISTRY = "your-docker-registry" // e.g., Docker Hub
+        IMAGE_NAME = "your-app-image"
+        IMAGE_TAG = "${env.BUILD_ID}"
+        REMOTE_USER = "jenkins-remote"
+        REMOTE_HOST = "192.168.1.150"
+        REMOTE_DIR = "/home/jenkins-remote/"
+    }
     stages {
         stage('build docker image') {
             steps {
@@ -26,11 +33,14 @@ pipeline {
         stage('deploy') {
             steps {
                 sshagent(['jenkins-remote-credentials']) {
-                    sh"ssh jenkins-remote@192.168.1.150"
+                    sh """
+                        scp docker-compose.yml ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
+                        ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && docker-compose up -d"
+                    """
                              // some block
                     }       
                     // Ensure BUILD_NUMBER is available for docker-compose
-                    sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
+                    // sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
             }
         }
     }
