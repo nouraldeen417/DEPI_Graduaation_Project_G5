@@ -35,7 +35,7 @@ pipeline {
                 sshagent(['jenkins-remote-credentials']) {
                     sh """
                         scp docker-compose.yml ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
-                        ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && docker-compose up -d"
+                        ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && docker compose up -d"
                     """
                              // some block
                     }       
