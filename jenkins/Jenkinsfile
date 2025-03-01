@@ -4,6 +4,7 @@ pipeline {
     stages {
         stage('build docker image') {
             steps {
+                
                     sh "ls -l"
                     sh "docker build -t networkapp:$BUILD_NUMBER .   "
                     sh "cd nginx && docker build -t nginx_custom:0 .   "
@@ -24,6 +25,10 @@ pipeline {
         }
         stage('deploy') {
             steps {
+                sshagent(['jenkins-remote-credentials']) {
+                    sh"ssh jenkins-remote@192.168.1.150"
+                             // some block
+                    }       
                     // Ensure BUILD_NUMBER is available for docker-compose
                     sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
             }
