@@ -1,49 +1,82 @@
 pipeline {
     agent any
+    // Define parameters
+    parameters {
+        choice(name: 'DEPLOY_TARGET', choices: ['kubernetes', 'docker', 'both'], description: 'Select the deployment target')
+        string(name: 'DOCKER_IMAGE', defaultValue: "your-docker-image:${env.BUILD_NUMBER}", description: 'Docker image name and tag')
+        string(name: 'KUBE_NAMESPACE', defaultValue: 'default', description: 'Kubernetes namespace')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
+    }
+
     environment {
-        DOCKER_REGISTRY = "your-docker-registry" // e.g., Docker Hub
-        IMAGE_NAME = "your-app-image"
+        DOCKER_REGISTRY = 'your-docker-registry' // e.g., Docker Hub
+        IMAGE_NAME = 'your-app-image'
         IMAGE_TAG = "${env.BUILD_ID}"
-        REMOTE_USER = "jenkins-remote"
-        REMOTE_HOST = "192.168.1.150"
-        REMOTE_DIR = "/home/jenkins-remote/"
+        REMOTE_USER = 'jenkins-remote'
+        REMOTE_HOST = '192.168.1.150'
+        REMOTE_DIR = '/home/jenkins-remote/'
     }
     stages {
         stage('build docker image') {
             steps {
-                
-                    sh "ls -l"
+                    sh 'ls -l'
                     sh "docker build -t networkapp:$BUILD_NUMBER .   "
                     sh "cd nginx && docker build -t nginx_custom:$BUILD_NUMBER .   "
-                    sh "ls -l && pwd"
-                    echo 'push images in my public regitry '
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]) 
-                {
-                    sh 'docker login -u $USER -p $PASS\
-                     && docker tag networkapp:$BUILD_NUMBER nouraldeen152/networkapp:$BUILD_NUMBER\
-                     && docker tag nginx_custom:$BUILD_NUMBER nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER}\
-                     && docker push nouraldeen152/networkapp:$BUILD_NUMBER \
-                     && docker push nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER} '
-                }
-            }
-        }       
-        stage('test') {
-            steps {
-                sh "echo test stage"
+                    sh 'ls -l && pwd'
             }
         }
-        stage('deploy') {
+        stage('Push Docker Image') {
+            steps {
+                echo 'push images in my public regitry '
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')])
+                    {
+                        sh 'docker login -u $USER -p $PASS\
+                        && docker tag networkapp:$BUILD_NUMBER nouraldeen152/networkapp:$BUILD_NUMBER\
+                        && docker tag nginx_custom:$BUILD_NUMBER nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER}\
+                        && docker push nouraldeen152/networkapp:$BUILD_NUMBER \
+                        && docker push nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER} '
+                    }
+            }
+        }
+
+        stage('test') {
+            steps {
+                sh 'echo test stage'
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            when {
+                expression { return params.DEPLOY_TARGET == 'kubernetes' || params.DEPLOY_TARGET == 'both' }
+            }
+            steps {
+                sh 'echo start deploying in kubernates'            
+             }
+        }
+
+        stage('Deploy to Docker') {
+            when {
+                expression { return params.DEPLOY_TARGET == 'docker' || params.DEPLOY_TARGET == 'both' }
+            }
             steps {
                 sshagent(['jenkins-remote-credentials']) {
                     sh """
                         scp docker-compose.yml ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
                         ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
                     """
-                             // some block
-                    }       
-                    // Ensure BUILD_NUMBER is available for docker-compose
-                    // sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
+                // some block
+                }
+            // Ensure BUILD_NUMBER is available for docker-compose
+            // sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
             }
+        }
+    }
+    post {
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed. Check the logs for more details."
         }
     }
 }
