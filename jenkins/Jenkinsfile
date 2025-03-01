@@ -24,7 +24,7 @@ pipeline {
         stage('deploy') {
             steps {
                     // Ensure BUILD_NUMBER is available for docker-compose
-                    sh "BUILD_NUMBER=${BUILD_NUMBER} docker-compose up -d"
+                    sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
             }
         }
     }
