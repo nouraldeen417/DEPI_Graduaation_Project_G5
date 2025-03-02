@@ -1,0 +1,49 @@
+# NGINX Deployment to Serve Static Files
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-static
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-reverseproxy
+  template:
+    metadata:
+      labels:
+        app: nginx-reverseproxy
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d  # Mount the ConfigMap here
+          readOnly: true
+        - name: shared-storage
+          mountPath: /app/staticfiles/ # Path where NGINX serves static files  
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config  # Reference the ConfigMap
+      - name: shared-storage
+        persistentVolumeClaim:
+          claimName: my-pvc 
+
+---
+# Service to Expose NGINX
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-reverseproxy-svc
+spec:
+  selector:
+    app: nginx-reverseproxy
+  type: NodePort
+  ports:
+  - port: 80  
+    protocol: TCP
+    targetPort: 80
+    nodePort: 30008

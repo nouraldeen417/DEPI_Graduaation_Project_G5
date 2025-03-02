@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: networkapp
+  name: networkapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: networkapp
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: networkapp
+    spec:
+      containers:
+      - image: nouraldeen152/networkapp:1
+        name: networkapp
+        ports:
+        - containerPort: 8000
+        env:
+          - name: DJANGO_ALLOWED_HOSTS
+            value: localhost,127.0.0.1
+          - name: DJANGO_TRUSTED_ORIGIN
+            value: http://localhost:30008            
+        volumeMounts:
+        - name: shared-storage
+          mountPath: /data
+      volumes:
+      - name: shared-storage
+        persistentVolumeClaim:
+          claimName: my-pvc          
+
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: networkapp-svc
+  name: networkapp-svc
+spec:
+  selector:
+    app: networkapp
+  type: NodePort
+  ports:
+  - port: 8000  
+    protocol: TCP
+    targetPort: 8000
+    nodePort: 30007
+status:
+  loadBalancer: {}
