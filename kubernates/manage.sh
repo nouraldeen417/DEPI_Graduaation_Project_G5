@@ -2,7 +2,7 @@
 
 # Directory containing Kubernetes manifest files
 MANIFESTS_DIR="`pwd`/manifests"
-
+KUBECONFIG="/var/jenkins_home/jobs/network_web_app/workspace/.kube/config"
 # Check if the directory exists
 if [ ! -d "$MANIFESTS_DIR" ]; then
   echo "Error: Directory $MANIFESTS_DIR not found."
@@ -15,7 +15,6 @@ if [ "$1" != "apply" ] && [ "$1" != "delete" ]; then
 fi
 
 MODE=$1
- echo ${KUBECONFIG}
 # Apply all YAML files in the directory
 for FILE in "$MANIFESTS_DIR"/*.yaml "$MANIFESTS_DIR"/*.yml; do
   if [ -f "$FILE" ]; then
