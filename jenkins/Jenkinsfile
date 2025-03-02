@@ -2,8 +2,16 @@ pipeline {
     agent any
     // Define parameters
     parameters {
-        choice(name: 'DEPLOY_TARGET', choices: ['kubernetes', 'docker', 'both'], description: 'Select the deployment target')
-        string(name: 'DOCKER_IMAGE', defaultValue: "your-docker-image:${env.BUILD_NUMBER}", description: 'Docker image name and tag')
+        choice(
+            name: 'DEPLOY_TARGET',
+            choices: ['kubernetes', 'docker', 'both'],
+            description: 'Select the deployment target'
+        )
+        choice(
+            name: 'PIPELINE_ACTION',
+            choices: ['build', 'deploy', 'both'],
+            description: 'Choose to build only, deploy only, or both build and deploy'
+        )
         string(name: 'KUBE_NAMESPACE', defaultValue: 'default', description: 'Kubernetes namespace')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
     }
@@ -19,6 +27,10 @@ pipeline {
     }
     stages {
         stage('build docker image') {
+            when {
+                expression { return params.PIPELINE_ACTION == 'build' || params.PIPELINE_ACTION == 'both' }
+            }
+
             steps {
                     sh 'ls -l'
                     sh "docker build -t networkapp:$BUILD_NUMBER .   "
@@ -27,6 +39,9 @@ pipeline {
             }
         }
         stage('Push Docker Image') {
+            when {
+                expression { return params.PIPELINE_ACTION == 'build' || params.PIPELINE_ACTION == 'both' }
+            }
             steps {
                 echo 'push images in my public regitry '
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')])
@@ -48,7 +63,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             when {
-                expression { return params.DEPLOY_TARGET == 'kubernetes' || params.DEPLOY_TARGET == 'both' }
+                allOf {
+                        expression { return params.DEPLOY_TARGET == 'kubernetes' || params.DEPLOY_TARGET == 'both' }
+                        expression { return params.PIPELINE_ACTION == 'deploy' || params.PIPELINE_ACTION == 'both' }
+                    }
             }
             steps {
                     withCredentials([string(credentialsId: 'kubeconfig-secret', variable: 'KUBECONFIG_BASE64')]) {
@@ -74,8 +92,11 @@ pipeline {
 
         stage('Deploy to Docker') {
             when {
-                expression { return params.DEPLOY_TARGET == 'docker' || params.DEPLOY_TARGET == 'both' }
-            }
+                    allOf {
+                        expression { return params.DEPLOY_TARGET == 'docker' || params.DEPLOY_TARGET == 'both' }
+                        expression { return params.PIPELINE_ACTION == 'deploy' || params.PIPELINE_ACTION == 'both' }
+                    }
+                }
             steps {
                 sshagent(['jenkins-remote-credentials']) {
                     sh """
