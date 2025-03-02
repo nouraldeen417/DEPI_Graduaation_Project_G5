@@ -60,7 +60,8 @@ pipeline {
                         """
                         sh """
                         kubectl get nodes --kubeconfig=${KUBECONFIG}
-                        chmod +x ./kubernates/manage.sh 
+                        cd kubernates/
+                        chmod +x ./manage.sh 
                         ./kubernates/manage.sh apply
                           """
                     }           

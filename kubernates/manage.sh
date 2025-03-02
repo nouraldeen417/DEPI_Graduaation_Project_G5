@@ -19,7 +19,7 @@ MODE=$1
 for FILE in "$MANIFESTS_DIR"/*.yaml "$MANIFESTS_DIR"/*.yml; do
   if [ -f "$FILE" ]; then
     echo "Applying manifest: $FILE"
-    kubectl "$MODE" -f "$FILE"
+    kubectl "$MODE" -f "$FILE --kubeconfig=${KUBECONFIG}"
     if [ $? -ne 0 ]; then
       echo "Error: Failed to $MODE $FILE"
       exit 1
