@@ -62,6 +62,7 @@ pipeline {
                         sh """
                         kubectl get nodes --kubeconfig=${KUBECONFIG}
                         echo ${KUBECONFIG}
+                        export KUBECONFIG=${KUBECONFIG}
                         chmod +x ./manage.sh 
                         ./manage.sh apply
                           """
