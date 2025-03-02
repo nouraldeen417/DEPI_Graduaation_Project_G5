@@ -18,7 +18,7 @@ spec:
         app: networkapp
     spec:
       containers:
-      - image: nouraldeen152/networkapp:1
+      - image: nouraldeen152/networkapp:19
         name: networkapp
         ports:
         - containerPort: 8000
@@ -27,13 +27,13 @@ spec:
             value: localhost,127.0.0.1
           - name: DJANGO_TRUSTED_ORIGIN
             value: http://localhost:30008            
-        volumeMounts:
-        - name: shared-storage
-          mountPath: /data
-      volumes:
-      - name: shared-storage
-        persistentVolumeClaim:
-          claimName: my-pvc          
+      #   volumeMounts:
+      #   - name: shared-storage
+      #     mountPath: /app/djangoapp/staticfiles
+      # volumes:
+      # - name: shared-storage
+      #   persistentVolumeClaim:
+      #     claimName: my-pvc          
 
 status: {}
 
@@ -48,11 +48,11 @@ metadata:
 spec:
   selector:
     app: networkapp
-  type: NodePort
+  # type: NodePort
   ports:
   - port: 8000  
     protocol: TCP
     targetPort: 8000
-    nodePort: 30007
+    # nodePort: 30007
 status:
   loadBalancer: {}

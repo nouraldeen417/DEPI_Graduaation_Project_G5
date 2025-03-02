@@ -15,6 +15,7 @@ pipeline {
         REMOTE_USER = 'jenkins-remote'
         REMOTE_HOST = '192.168.1.150'
         REMOTE_DIR = '/home/jenkins-remote/'
+        KUBECONFIG = "${WORKSPACE}/.kube/config"
     }
     stages {
         stage('build docker image') {
@@ -50,7 +51,19 @@ pipeline {
                 expression { return params.DEPLOY_TARGET == 'kubernetes' || params.DEPLOY_TARGET == 'both' }
             }
             steps {
-                sh 'echo start deploying in kubernates'            
+                    withCredentials([string(credentialsId: 'kubeconfig-secret', variable: 'KUBECONFIG_BASE64')]) {
+                        // Decode the kubeconfig and write it to a file
+                        sh """
+                            mkdir -p ${WORKSPACE}/.kube
+                            echo ${KUBECONFIG_BASE64} | base64 --decode > ${KUBECONFIG}
+                            chmod 600 ${KUBECONFIG}
+                        """
+                        sh """
+                        kubectl get nodes --kubeconfig=${KUBECONFIG}
+                        chmod +x ./kubernates/manage.sh 
+                        ./kubernates/manage.sh apply
+                          """
+                    }           
              }
         }
 

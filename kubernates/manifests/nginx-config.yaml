@@ -1,0 +1,32 @@
+apiVersion: v1
+data:
+  nginx.conf: |-
+    server {
+        listen 80;
+        server_name 192.168.1.150;
+
+        # Serve static files
+        location /static/ {
+            alias /app/staticfiles/;  # Path to your static files
+        }
+
+        # Serve media files
+        location /media/ {
+            alias /app/media/;  # Path to your media files
+        }
+
+        # Forward all other requests to Gunicorn
+        location / {
+            proxy_pass http://networkapp-svc:8000;  # Forward to Gunicorn
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+    }
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2025-03-02T00:18:44Z"
+  name: nginx-config
+  namespace: default
+  resourceVersion: "309891"
+  uid: 3402500c-2a2c-40dc-aece-5fe95b7096f5
