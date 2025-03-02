@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Directory containing Kubernetes manifest files
-MANIFESTS_DIR="`pwd`/manifests"
-KUBECONFIG="/var/jenkins_home/jobs/network_web_app/workspace/.kube/config"
+cd ./manifests
+MANIFESTS_DIR=`pwd`
+KUBECONFIG="/var/jenkins_home/jobs/network_web_app/workspace/.kube/config
 # Check if the directory exists
 if [ ! -d "$MANIFESTS_DIR" ]; then
   echo "Error: Directory $MANIFESTS_DIR not found."
