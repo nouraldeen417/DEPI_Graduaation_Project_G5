@@ -24,6 +24,7 @@ pipeline {
         REMOTE_HOST = '192.168.1.150'
         REMOTE_DIR = "/home/jenkins-remote/"
         KUBECONFIG = "${WORKSPACE}/.kube/config"
+        SLACK_CHANNEL = '#team-project' // Slack channel to send notifications
     }
     stages {
         stage('build docker image') {
@@ -112,21 +113,22 @@ pipeline {
     }
     post {
         success {
-            echo "Pipeline completed successfully!"
+            slackSend(
+                channel: env.SLACK_CHANNEL,
+                message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+            )
         }
         failure {
-            script {
-                echo "Build failed. Deleting Docker image: ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
-                // withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')])
-                //     {
-                //         sh """
-                //         docker login -u $USER -p $PASS
-                //         docker rmi ${IMAGE_NAME}:${IMAGE_TAG} 
-                //         docker rmi nouraldeen152/nginx_reverse_proxy:${IMAGE_TAG} 
-                //         """
-                //     }
-            }
-            
+            slackSend(
+                channel: env.SLACK_CHANNEL,
+                message: "❌ Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+            )
+        }
+        unstable {
+            slackSend(
+                channel: env.SLACK_CHANNEL,
+                message: "⚠️ Pipeline UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+            )
         }
     }
 }
