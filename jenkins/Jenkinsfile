@@ -9,7 +9,7 @@ pipeline {
         )
         choice(
             name: 'PIPELINE_ACTION',
-            choices: ['build', 'deploy', 'both'],
+            choices: ['build & deploy','build only', 'deploy only'],
             description: 'Choose to build only, deploy only, or both build and deploy'
         )
         string(name: 'CUSTOM_BUILD_NUMBER', defaultValue: "${BUILD_NUMBER}", description: 'specify  image tag or BUILD_NUMBER will be as default')
