@@ -5,7 +5,7 @@ This guide explains how to Dockerize a Django application, serve it using Gunico
 
 ---
 
-## Table of Contents
+## Table of Content
 
 1. [Prerequisites](#prerequisites)
 2. [Project Structure](#project-structure)
