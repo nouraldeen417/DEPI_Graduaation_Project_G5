@@ -12,14 +12,14 @@ pipeline {
             choices: ['build', 'deploy', 'both'],
             description: 'Choose to build only, deploy only, or both build and deploy'
         )
-        string(name: 'KUBE_NAMESPACE', defaultValue: 'default', description: 'Kubernetes namespace')
+        string(name: 'CUSTOM_BUILD_NUMBER', defaultValue: '', description: 'specify  image tag or BUILD_NUMBER will be as default')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
     }
 
     environment {
         DOCKER_REGISTRY = 'your-docker-registry' // e.g., Docker Hub
-        IMAGE_NAME = 'your-app-image'
-        IMAGE_TAG = "${env.BUILD_ID}"
+        IMAGE_NAME = 'nouraldeen152/networkapp'
+        IMAGE_TAG =  '${params.CUSTOM_BUILD_NUMBER ?: env.BUILD_NUMBER}' // Use custom build number or default to BUILD_NUMBER
         REMOTE_USER = 'jenkins-remote'
         REMOTE_HOST = '192.168.1.150'
         REMOTE_DIR = '/home/jenkins-remote/'
@@ -32,10 +32,11 @@ pipeline {
             }
 
             steps {
-                    sh 'ls -l'
-                    sh "docker build -t networkapp:$BUILD_NUMBER .   "
-                    sh "cd nginx && docker build -t nginx_custom:$BUILD_NUMBER .   "
-                    sh 'ls -l && pwd'
+                    sh """
+                       docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .   
+                       cd nginx
+                       docker build -t nouraldeen152/nginx_reverse_proxy:${IMAGE_TAG} . 
+                       """
             }
         }
         stage('Push Docker Image') {
@@ -46,11 +47,11 @@ pipeline {
                 echo 'push images in my public regitry '
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')])
                     {
-                        sh 'docker login -u $USER -p $PASS\
-                        && docker tag networkapp:$BUILD_NUMBER nouraldeen152/networkapp:$BUILD_NUMBER\
-                        && docker tag nginx_custom:$BUILD_NUMBER nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER}\
-                        && docker push nouraldeen152/networkapp:$BUILD_NUMBER \
-                        && docker push nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER} '
+                        sh """
+                        docker login -u $USER -p $PASS
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG} 
+                        docker push nouraldeen152/nginx_reverse_proxy:${IMAGE_TAG} 
+                        """
                     }
             }
         }
@@ -103,7 +104,6 @@ pipeline {
                         scp docker-compose.yml ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
                         ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
                     """
-                // some block
                 }
             // Ensure BUILD_NUMBER is available for docker-compose
             // sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
@@ -115,7 +115,18 @@ pipeline {
             echo "Pipeline completed successfully!"
         }
         failure {
-            echo "Pipeline failed. Check the logs for more details."
+            script {
+                echo "Build failed. Deleting Docker image: ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                // withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')])
+                //     {
+                //         sh """
+                //         docker login -u $USER -p $PASS
+                //         docker rmi ${IMAGE_NAME}:${IMAGE_TAG} 
+                //         docker rmi nouraldeen152/nginx_reverse_proxy:${IMAGE_TAG} 
+                //         """
+                //     }
+                //    }
+            
         }
     }
 }
