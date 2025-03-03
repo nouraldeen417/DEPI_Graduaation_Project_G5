@@ -8,6 +8,7 @@ services:
       - staticfiles:/app/djangoapp/staticfiles  # Mount staticfiles volume
     environment:
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+      - DJANGO_TRUSTED_ORIGIN=http://localhost:30008            
 
   nginx:
     image: nouraldeen152/nginx_reverse_proxy:${BUILD_NUMBER} 
