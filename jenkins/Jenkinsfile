@@ -28,7 +28,7 @@ pipeline {
     stages {
         stage('build docker image') {
             when {
-                expression { return params.PIPELINE_ACTION == 'build' || params.PIPELINE_ACTION == 'both' }
+                expression { return params.PIPELINE_ACTION == 'build only' || params.PIPELINE_ACTION == 'build & deploy' }
             }
 
             steps {
@@ -41,7 +41,7 @@ pipeline {
         }
         stage('Push Docker Image') {
             when {
-                expression { return params.PIPELINE_ACTION == 'build' || params.PIPELINE_ACTION == 'both' }
+                expression { return params.PIPELINE_ACTION == 'build only' || params.PIPELINE_ACTION == 'build & deploy' }
             }
             steps {
                 echo 'push images in my public regitry '
@@ -66,7 +66,7 @@ pipeline {
             when {
                 allOf {
                         expression { return params.DEPLOY_TARGET == 'kubernetes' || params.DEPLOY_TARGET == 'both' }
-                        expression { return params.PIPELINE_ACTION == 'deploy' || params.PIPELINE_ACTION == 'both' }
+                        expression { return params.PIPELINE_ACTION == 'deploy only' || params.PIPELINE_ACTION == 'build & deploy' }
                     }
             }
             steps {
@@ -95,7 +95,7 @@ pipeline {
             when {
                     allOf {
                         expression { return params.DEPLOY_TARGET == 'docker' || params.DEPLOY_TARGET == 'both' }
-                        expression { return params.PIPELINE_ACTION == 'deploy' || params.PIPELINE_ACTION == 'both' }
+                        expression { return params.PIPELINE_ACTION == 'deploy only' || params.PIPELINE_ACTION == 'build & deploy' }
                     }
                 }
             steps {
