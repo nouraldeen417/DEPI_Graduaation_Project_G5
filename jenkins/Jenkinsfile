@@ -44,7 +44,7 @@ pipeline {
                 expression { return params.PIPELINE_ACTION == 'build' || params.PIPELINE_ACTION == 'both' }
             }
             steps {
-                // echo 'push images in my public regitry '
+                echo 'push images in my public regitry '
 
             }
         }
