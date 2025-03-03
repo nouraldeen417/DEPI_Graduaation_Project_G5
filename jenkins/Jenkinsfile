@@ -44,9 +44,8 @@ pipeline {
                 expression { return params.PIPELINE_ACTION == 'build' || params.PIPELINE_ACTION == 'both' }
             }
             steps {
-                echo 'push images in my public regitry '
+                // echo 'push images in my public regitry '
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-
                         sh """
                         docker login -u $USER -p $PASS
                         docker push ${IMAGE_NAME}:${IMAGE_TAG} 
