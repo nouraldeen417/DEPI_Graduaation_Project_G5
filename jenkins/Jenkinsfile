@@ -45,7 +45,13 @@ pipeline {
             }
             steps {
                 echo 'push images in my public regitry '
-
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                    sh """
+                        docker login -u ${USER} -p ${PASS}
+                        docker push ${env.IMAGE_NAME}:${env.IMAGE_TAG}
+                        docker push nouraldeen152/nginx_reverse_proxy:${env.IMAGE_TAG}
+                    """
+                }
             }
         }
 
