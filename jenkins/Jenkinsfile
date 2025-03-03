@@ -19,7 +19,7 @@ pipeline {
     environment {
         DOCKER_REGISTRY = 'your-docker-registry' // e.g., Docker Hub
         IMAGE_NAME = "nouraldeen152/networkapp"
-        IMAGE_TAG =  ${params.CUSTOM_BUILD_NUMBER} // Use custom build number or default to BUILD_NUMBER
+        IMAGE_TAG =  "${params.CUSTOM_BUILD_NUMBER}" // Use custom build number or default to BUILD_NUMBER
         REMOTE_USER = 'jenkins-remote'
         REMOTE_HOST = '192.168.1.150'
         REMOTE_DIR = "/home/jenkins-remote/"
