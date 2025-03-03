@@ -32,11 +32,11 @@ pipeline {
             }
 
             steps {
-                    sh """
-                       docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} .   
-                       cd nginx
-                       docker build -t nouraldeen152/nginx_reverse_proxy:${IMAGE_TAG} . 
-                       """
+                sh """
+                    docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} .
+                    cd nginx
+                    docker build -t nouraldeen152/nginx_reverse_proxy:${env.IMAGE_TAG} .
+                """
             }
         }
         stage('Push Docker Image') {
