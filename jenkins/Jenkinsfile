@@ -33,9 +33,9 @@ pipeline {
 
             steps {
                 sh """
-                    docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} .
+                    docker build -t ${env.IMAGE_NAME}:0 .
                     cd nginx
-                    docker build -t nouraldeen152/nginx_reverse_proxy:${env.IMAGE_TAG} .
+                    docker build -t nouraldeen152/nginx_reverse_proxy:0 .
                 """
             }
         }
