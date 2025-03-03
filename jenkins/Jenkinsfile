@@ -46,9 +46,9 @@ pipeline {
             steps {
                 echo 'push images in my public regitry '
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                    sh """
-                        docker login -u ${USER} -p ${PASS}
 
+                    sh """
+                        echo fuck me
                     """
                 }
             }
