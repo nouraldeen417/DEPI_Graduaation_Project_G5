@@ -12,7 +12,7 @@ pipeline {
             choices: ['build', 'deploy', 'both'],
             description: 'Choose to build only, deploy only, or both build and deploy'
         )
-        string(name: 'CUSTOM_BUILD_NUMBER', defaultValue: '', description: 'specify  image tag or BUILD_NUMBER will be as default')
+        string(name: 'CUSTOM_BUILD_NUMBER', defaultValue: "${BUILD_NUMBER}", description: 'specify  image tag or BUILD_NUMBER will be as default')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
     }
 
@@ -48,7 +48,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
 
                     sh """
-                        echo fuck me
+
                         docker push ${env.IMAGE_NAME}:${env.IMAGE_TAG}
                         docker push nouraldeen152/nginx_reverse_proxy:${env.IMAGE_TAG}
                     """
@@ -102,7 +102,7 @@ pipeline {
                 sshagent(['jenkins-remote-credentials']) {
                     sh """
                         scp docker-compose.yml ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
-                        ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
+                        ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && BUILD_NUMBER=${IMAGE_TAG} docker compose up -d"
                     """
                 }
             // Ensure BUILD_NUMBER is available for docker-compose
