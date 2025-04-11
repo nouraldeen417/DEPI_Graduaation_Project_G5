@@ -52,11 +52,10 @@ stages {
     
             """
                     // Check if config file exists
-                    if (fileExists(configFile)) {
+                    if (fileExists("${WORKSPACE}/deploy.conf")) {
+                      echo "File src/main/resources/index.html found!"   
                      // Log for debugging
-                    sh  """
-                            echo "fuck me"
-                        """
+
                         // // Read file content
                         // def config = readFile(configFile).trim()
                         // // Parse each parameter using regex
