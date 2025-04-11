@@ -57,34 +57,34 @@ stages {
                     sh  """
                             echo "fuck me"
                         """
-                        // Read file content
-                        def config = readFile(configFile).trim()
-                        // Parse each parameter using regex
-                        def matcher
+                        // // Read file content
+                        // def config = readFile(configFile).trim()
+                        // // Parse each parameter using regex
+                        // def matcher
 
-                        // DEPLOY_TARGET
-                        matcher = config =~ /DEPLOY_TARGET=([^\n]*)/
-                        if (matcher && matcher[0][1] in ['kubernetes', 'docker', 'both']) {
-                            deployTarget = matcher[0][1]
-                        }
+                        // // DEPLOY_TARGET
+                        // matcher = config =~ /DEPLOY_TARGET=([^\n]*)/
+                        // if (matcher && matcher[0][1] in ['kubernetes', 'docker', 'both']) {
+                        //     deployTarget = matcher[0][1]
+                        // }
 
-                        // PIPELINE_ACTION
-                        matcher = config =~ /PIPELINE_ACTION=([^\n]*)/
-                        if (matcher && matcher[0][1] in ['build & deploy', 'build only', 'deploy only']) {
-                            pipelineAction = matcher[0][1]
-                        }
+                        // // PIPELINE_ACTION
+                        // matcher = config =~ /PIPELINE_ACTION=([^\n]*)/
+                        // if (matcher && matcher[0][1] in ['build & deploy', 'build only', 'deploy only']) {
+                        //     pipelineAction = matcher[0][1]
+                        // }
 
-                        // CUSTOM_BUILD_NUMBER
-                        matcher = config =~ /CUSTOM_BUILD_NUMBER=([^\n]*)/
-                        if (matcher && matcher[0][1]) {
-                            customBuildNumber = matcher[0][1]
-                        }
+                        // // CUSTOM_BUILD_NUMBER
+                        // matcher = config =~ /CUSTOM_BUILD_NUMBER=([^\n]*)/
+                        // if (matcher && matcher[0][1]) {
+                        //     customBuildNumber = matcher[0][1]
+                        // }
 
-                        // SKIP_TESTS
-                        matcher = config =~ /SKIP_TESTS=([^\n]*)/
-                        if (matcher && matcher[0][1] in ['true', 'false']) {
-                            skipTests = matcher[0][1] == 'true'
-                        }
+                        // // SKIP_TESTS
+                        // matcher = config =~ /SKIP_TESTS=([^\n]*)/
+                        // if (matcher && matcher[0][1] in ['true', 'false']) {
+                        //     skipTests = matcher[0][1] == 'true'
+                        // }
                     }
 
                     // Override parameters
