@@ -35,65 +35,54 @@ stages {
                     def configFile = "${WORKSPACE}/deploy.conf"
     
                     // Initialize with defaults from parameters
-                    def deployTarget = params.DEPLOY_TARGET
-                    def pipelineAction = params.PIPELINE_ACTION
-                    def customBuildNumber = params.CUSTOM_BUILD_NUMBER
-                    def skipTests = params.SKIP_TESTS
-                     // Log for debugging
-                    sh  """
-                            echo "fuck you"
-                        """
-                        echo "Current workspace: ${WORKSPACE}"
-            sh """
-                pwd
-                ls -l ${WORKSPACE}
-                ls -l .
-                                    echo "Current workspace: ${configFile}"
-    
-            """
-                    // Check if config file exists
-                    if (fileExists('deploy.conf')) {
+            def deployParams = [
+                DEPLOY_TARGET: params.DEPLOY_TARGET,
+                PIPELINE_ACTION: params.PIPELINE_ACTION,
+                CUSTOM_BUILD_NUMBER: params.CUSTOM_BUILD_NUMBER,
+                SKIP_TESTS: params.SKIP_TESTS
+            ] 
+                   if (fileExists('deploy.conf')) {
                       echo "File src/main/resources/index.html found!"   
-                     // Log for debugging
+                     Log for debugging
 
-                        // // Read file content
-                        // def config = readFile(configFile).trim()
-                        // // Parse each parameter using regex
-                        // def matcher
+                        // Read file content
+                        def config = readFile(configFile).trim()
+                        // Parse each parameter using regex
+                        def matcher
 
-                        // // DEPLOY_TARGET
-                        // matcher = config =~ /DEPLOY_TARGET=([^\n]*)/
-                        // if (matcher && matcher[0][1] in ['kubernetes', 'docker', 'both']) {
-                        //     deployTarget = matcher[0][1]
-                        // }
+                        // DEPLOY_TARGET
+                        matcher = config =~ /DEPLOY_TARGET=([^\n]*)/
+                        if (matcher && matcher[0][1] in ['kubernetes', 'docker', 'both']) {
+                            deployTarget = matcher[0][1]
+                        }
 
-                        // // PIPELINE_ACTION
-                        // matcher = config =~ /PIPELINE_ACTION=([^\n]*)/
-                        // if (matcher && matcher[0][1] in ['build & deploy', 'build only', 'deploy only']) {
-                        //     pipelineAction = matcher[0][1]
-                        // }
+                        // PIPELINE_ACTION
+                        matcher = config =~ /PIPELINE_ACTION=([^\n]*)/
+                        if (matcher && matcher[0][1] in ['build & deploy', 'build only', 'deploy only']) {
+                            pipelineAction = matcher[0][1]
+                        }
 
-                        // // CUSTOM_BUILD_NUMBER
-                        // matcher = config =~ /CUSTOM_BUILD_NUMBER=([^\n]*)/
-                        // if (matcher && matcher[0][1]) {
-                        //     customBuildNumber = matcher[0][1]
-                        // }
+                        // CUSTOM_BUILD_NUMBER
+                        matcher = config =~ /CUSTOM_BUILD_NUMBER=([^\n]*)/
+                        if (matcher && matcher[0][1]) {
+                            customBuildNumber = matcher[0][1]
+                        }
 
-                        // // SKIP_TESTS
-                        // matcher = config =~ /SKIP_TESTS=([^\n]*)/
-                        // if (matcher && matcher[0][1] in ['true', 'false']) {
-                        //     skipTests = matcher[0][1] == 'true'
-                        // }
+                        // SKIP_TESTS
+                        matcher = config =~ /SKIP_TESTS=([^\n]*)/
+                        if (matcher && matcher[0][1] in ['true', 'false']) {
+                            skipTests = matcher[0][1] == 'true'
+                        }
                     }
+                else {
+                    echo "Warning: ${configFile} not found, using default parameters"
+                        }
 
-                    // // Override parameters
-                    // params.DEPLOY_TARGET = deployTarget
-                    // params.PIPELINE_ACTION = pipelineAction
-                    // params.CUSTOM_BUILD_NUMBER = customBuildNumber
-                    // params.SKIP_TESTS = skipTests
-
-
-                }
+            // Use env instead of params
+            env.DEPLOY_TARGET = deployParams.DEPLOY_TARGET
+            env.PIPELINE_ACTION = deployParams.PIPELINE_ACTION
+            env.CUSTOM_BUILD_NUMBER = deployParams.CUSTOM_BUILD_NUMBER
+            env.SKIP_TESTS = deployParams.SKIP_TESTS.toString()                }
                                     // Log for debugging
                     sh  """
                             echo "Set parameters: DEPLOY_TARGET=${params.DEPLOY_TARGET}, PIPELINE_ACTION=${params.PIPELINE_ACTION}, CUSTOM_BUILD_NUMBER=${params.CUSTOM_BUILD_NUMBER}, SKIP_TESTS=${params.SKIP_TESTS}"
