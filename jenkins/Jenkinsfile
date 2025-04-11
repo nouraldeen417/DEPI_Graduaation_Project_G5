@@ -33,6 +33,7 @@ pipeline {
                 // Branch to handle infrastructure setup (Ansible and Terraform)
                 stage('Infra') {
                         // Sub-stage to prep on-prem K8s cluster with Ansible
+                    stages{
                         stage('Ansible') {
                             when {
                                 expression { return params.DEPLOY_TARGET == 'kubernetes' || params.DEPLOY_TARGET == 'both'}
@@ -57,6 +58,8 @@ pipeline {
                                 }
                             }
                         }
+
+                    }
                     
                 }
                 // Branch to build and push Docker image
@@ -183,10 +186,10 @@ pipeline {
                         }
                     }   
 
-                                    }
-                                }
-                            }
-                        }
+                }
+            }
+        }
+    }
 
         
        
