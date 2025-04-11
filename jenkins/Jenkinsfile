@@ -86,11 +86,11 @@ stages {
                         // }
                     }
 
-                    // Override parameters
-                    params.DEPLOY_TARGET = deployTarget
-                    params.PIPELINE_ACTION = pipelineAction
-                    params.CUSTOM_BUILD_NUMBER = customBuildNumber
-                    params.SKIP_TESTS = skipTests
+                    // // Override parameters
+                    // params.DEPLOY_TARGET = deployTarget
+                    // params.PIPELINE_ACTION = pipelineAction
+                    // params.CUSTOM_BUILD_NUMBER = customBuildNumber
+                    // params.SKIP_TESTS = skipTests
 
 
                 }
