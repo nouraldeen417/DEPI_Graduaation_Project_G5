@@ -48,6 +48,8 @@ stages {
                 pwd
                 ls -l ${WORKSPACE}
                 ls -l .
+                                    echo "Current workspace: ${configFile}"
+    
             """
                     // Check if config file exists
                     if (fileExists(configFile)) {
