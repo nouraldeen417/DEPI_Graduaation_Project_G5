@@ -43,7 +43,7 @@ stages {
             ] 
                    if (fileExists('deploy.conf')) {
                       echo "File src/main/resources/index.html found!"   
-                     Log for debugging
+                     //Log for debugging
 
                         // Read file content
                         def config = readFile(configFile).trim()
