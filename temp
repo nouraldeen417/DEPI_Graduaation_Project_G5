@@ -1,0 +1,162 @@
+pipeline {
+    agent any
+    // Define a multi-select parameter to choose deployment targets (k8s, aws, onprem)
+    parameters {
+        string(name: 'DEPLOY_TO', defaultValue: 'k8s,aws,onprem', description: 'Comma-separated targets: k8s,aws,onprem')
+    }
+    stages {
+        // Stage for initial checks (e.g., validate parameters)
+        stage('Setup') {
+            steps {
+                echo "Running for DEPLOY_TO=${params.DEPLOY_TO}"
+                // Add checks here (e.g., validate DEPLOY_TO values)
+            }
+        }
+        // Stage to prepare infra and build images in parallel
+        stage('Prep') {
+            parallel {
+                // Branch to handle infrastructure setup (Ansible and Terraform)
+                stage('Infra') {
+                    parallel {
+                        // Sub-stage to prep on-prem K8s cluster with Ansible
+                        stage('Ansible') {
+                            steps {
+                                // Runs playbook to set up K8s cluster on-prem
+                                // Uses DEPLOY_TO to customize if needed (e.g., specific nodes)
+                                sh "ansible-playbook ansible/prep-k8s.yml -e deploy_to=${params.DEPLOY_TO}"
+                            }
+                        }
+                        // Sub-stage to provision AWS resources with Terraform
+                        stage('Terraform') {
+                            steps {
+                                // Initializes Terraform (e.g., for AWS EC2, VPC)
+                                sh "terraform -chdir=terraform init"
+                                // Applies Terraform config for AWS resources
+                                sh "terraform -chdir=terraform apply -auto-approve -var deploy_to=${params.DEPLOY_TO}"
+                            }
+                        }
+                    }
+                }
+                // Branch to build and push Docker image
+                stage('Image') {
+                    stages {
+                        // Sub-stage to build the app’s Docker image
+                        stage('Build') {
+                            steps {
+                                // Builds image (replace with your Dockerfile path)
+                                sh 'docker build -t my-app:latest .'
+                            }
+                        }
+                        // Sub-stage to push image to registry
+                        stage('Push') {
+                            steps {
+                                // Pushes image (replace with your registry, e.g., ECR)
+                                sh 'docker push my-app:latest'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // Stage to deploy the app to chosen targets
+        stage('Deploy') {
+            stages {
+                // Sub-stage to prepare deployment environment
+                stage('Prep Environment') {
+                    steps {
+                        // Runs Ansible to install packages (e.g., Docker) on target environments
+                        sh "ansible-playbook ansible/deploy-prep.yml -e deploy_to=${params.DEPLOY_TO}"
+                    }
+                }
+                // Sub-stage to deploy to all selected targets in parallel
+                stage('Deploy App') {
+                    parallel {
+                        // Deployment to on-prem K8s cluster
+                        stage('Deploy K8s') {
+                            // Runs only if 'k8s' is in DEPLOY_TO
+                            when { expression { 'k8s' in params.DEPLOY_TO.split(',') } }
+                            steps {
+                                // Deploys to K8s (e.g., via Ansible or Helm)
+                                sh "ansible-playbook ansible/deploy-k8s.yml -e deploy_to=${params.DEPLOY_TO}"
+                            }
+                        }
+                        // Deployment to AWS EC2 with Docker
+                        stage('Deploy AWS') {
+                            // Runs only if 'aws' is in DEPLOY_TO
+                            when { expression { 'aws' in params.DEPLOY_TO.split(',') } }
+                            steps {
+                                // Deploys to AWS EC2 (e.g., via Ansible script)
+                                sh "ansible-playbook ansible/deploy-aws.yml -e deploy_to=${params.DEPLOY_TO}"
+                            }
+                        }
+                        // Deployment to on-prem non-K8s environment
+                        stage('Deploy On-Prem') {
+                            // Runs only if 'onprem' is in DEPLOY_TO
+                            when { expression { 'onprem' in params.DEPLOY_TO.split(',') } }
+                            steps {
+                                // Deploys to on-prem (e.g., via Ansible for Docker)
+                                sh "ansible-playbook ansible/deploy-onprem.yml -e deploy_to=${params.DEPLOY_TO}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+stage('Setup') {
+    steps {
+        script {
+            // Define config file path in repo
+            def configFile = 'deploy.conf'
+            // Initialize with defaults from parameters
+            def deployTarget = params.DEPLOY_TARGET
+            def pipelineAction = params.PIPELINE_ACTION
+            def customBuildNumber = params.CUSTOM_BUILD_NUMBER
+            def skipTests = params.SKIP_TESTS
+
+            // Check if config file exists
+            if (fileExists(configFile)) {
+                // Read file content
+                def config = readFile(configFile).trim()
+                // Parse each parameter using regex
+                def matcher
+
+                // DEPLOY_TARGET
+                matcher = config =~ /DEPLOY_TARGET=([^\n]*)/
+                if (matcher && matcher[0][1] in ['kubernetes', 'docker', 'both']) {
+                    deployTarget = matcher[0][1]
+                }
+
+                // PIPELINE_ACTION
+                matcher = config =~ /PIPELINE_ACTION=([^\n]*)/
+                if (matcher && matcher[0][1] in ['build & deploy', 'build only', 'deploy only']) {
+                    pipelineAction = matcher[0][1]
+                }
+
+                // CUSTOM_BUILD_NUMBER
+                matcher = config =~ /CUSTOM_BUILD_NUMBER=([^\n]*)/
+                if (matcher && matcher[0][1]) {
+                    customBuildNumber = matcher[0][1]
+                }
+
+                // SKIP_TESTS
+                matcher = config =~ /SKIP_TESTS=([^\n]*)/
+                if (matcher && matcher[0][1] in ['true', 'false']) {
+                    skipTests = matcher[0][1] == 'true'
+                }
+            }
+
+            // Override parameters
+            params.DEPLOY_TARGET = deployTarget
+            params.PIPELINE_ACTION = pipelineAction
+            params.CUSTOM_BUILD_NUMBER = customBuildNumber
+            params.SKIP_TESTS = skipTests
+
+            // Log for debugging
+            echo "Set parameters: DEPLOY_TARGET=${params.DEPLOY_TARGET}, PIPELINE_ACTION=${params.PIPELINE_ACTION}, CUSTOM_BUILD_NUMBER=${params.CUSTOM_BUILD_NUMBER}, SKIP_TESTS=${params.SKIP_TESTS}"
+        }
+    }
+}

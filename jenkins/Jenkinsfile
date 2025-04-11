@@ -26,109 +26,163 @@ pipeline {
         KUBECONFIG = "${WORKSPACE}/.kube/config"
         SLACK_CHANNEL = '#team-project' // Slack channel to send notifications
     }
-    stages {
-        stage('build docker image') {
-            when {
-                expression { return params.PIPELINE_ACTION == 'build only' || params.PIPELINE_ACTION == 'build & deploy' }
-            }
+stages {
+    stage('Setup') {
+        steps {
+                script {
+                    // Define config file path in repo
+                    def configFile = '../deploy.conf'
+                    // Initialize with defaults from parameters
+                    def deployTarget = params.DEPLOY_TARGET
+                    def pipelineAction = params.PIPELINE_ACTION
+                    def customBuildNumber = params.CUSTOM_BUILD_NUMBER
+                    def skipTests = params.SKIP_TESTS
 
-            steps {
-                sh """
-                    docker build -t ${env.IMAGE_NAME}:${IMAGE_TAG}  .
-                    cd nginx
-                    docker build -t nouraldeen152/nginx_reverse_proxy:${IMAGE_TAG}  .
-                """
-            }
-        }
-        stage('Push Docker Image') {
-            when {
-                expression { return params.PIPELINE_ACTION == 'build only' || params.PIPELINE_ACTION == 'build & deploy' }
-            }
-            steps {
-                echo 'push images in my public regitry '
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                    // Check if config file exists
+                    if (fileExists(configFile)) {
+                        // Read file content
+                        def config = readFile(configFile).trim()
+                        // Parse each parameter using regex
+                        def matcher
 
-                    sh """
+                        // DEPLOY_TARGET
+                        matcher = config =~ /DEPLOY_TARGET=([^\n]*)/
+                        if (matcher && matcher[0][1] in ['kubernetes', 'docker', 'both']) {
+                            deployTarget = matcher[0][1]
+                        }
 
-                        docker push ${env.IMAGE_NAME}:${env.IMAGE_TAG}
-                        docker push nouraldeen152/nginx_reverse_proxy:${env.IMAGE_TAG}
-                    """
-                }
-            }
-        }
+                        // PIPELINE_ACTION
+                        matcher = config =~ /PIPELINE_ACTION=([^\n]*)/
+                        if (matcher && matcher[0][1] in ['build & deploy', 'build only', 'deploy only']) {
+                            pipelineAction = matcher[0][1]
+                        }
 
-        stage('test') {
-            steps {
-                sh 'echo test stage'
-            }
-        }
+                        // CUSTOM_BUILD_NUMBER
+                        matcher = config =~ /CUSTOM_BUILD_NUMBER=([^\n]*)/
+                        if (matcher && matcher[0][1]) {
+                            customBuildNumber = matcher[0][1]
+                        }
 
-        stage('Deploy to Kubernetes') {
-            when {
-                allOf {
-                        expression { return params.DEPLOY_TARGET == 'kubernetes' || params.DEPLOY_TARGET == 'both' }
-                        expression { return params.PIPELINE_ACTION == 'deploy only' || params.PIPELINE_ACTION == 'build & deploy' }
+                        // SKIP_TESTS
+                        matcher = config =~ /SKIP_TESTS=([^\n]*)/
+                        if (matcher && matcher[0][1] in ['true', 'false']) {
+                            skipTests = matcher[0][1] == 'true'
+                        }
                     }
-            }
-            steps {
-                    withCredentials([string(credentialsId: 'kubeconfig-secret', variable: 'KUBECONFIG_BASE64')]) {
-                        // Decode the kubeconfig and write it to a file
-                        sh """
-                            mkdir -p ${WORKSPACE}/.kube
-                            echo ${KUBECONFIG_BASE64} | base64 --decode > ${KUBECONFIG}
-                            chmod 600 ${KUBECONFIG}
-                        """
-                        dir('kubernates/') {
-                        sh """
-                        kubectl get nodes --kubeconfig=${KUBECONFIG}
-                        echo ${KUBECONFIG}
-                        export KUBECONFIG=${KUBECONFIG}
-                        chmod +x ./manage.sh 
-                        ./manage.sh apply
-                          """
-                     }
 
-                    }           
-             }
-        }
+                    // Override parameters
+                    params.DEPLOY_TARGET = deployTarget
+                    params.PIPELINE_ACTION = pipelineAction
+                    params.CUSTOM_BUILD_NUMBER = customBuildNumber
+                    params.SKIP_TESTS = skipTests
 
-        stage('Deploy to Docker') {
-            when {
-                    allOf {
-                        expression { return params.DEPLOY_TARGET == 'docker' || params.DEPLOY_TARGET == 'both' }
-                        expression { return params.PIPELINE_ACTION == 'deploy only' || params.PIPELINE_ACTION == 'build & deploy' }
-                    }
+                    // Log for debugging
+                    echo "Set parameters: DEPLOY_TARGET=${params.DEPLOY_TARGET}, PIPELINE_ACTION=${params.PIPELINE_ACTION}, CUSTOM_BUILD_NUMBER=${params.CUSTOM_BUILD_NUMBER}, SKIP_TESTS=${params.SKIP_TESTS}"
                 }
-            steps {
-                sshagent(['jenkins-remote-credentials']) {
-                    sh """
-                        scp docker-compose.yml ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
-                        ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && BUILD_NUMBER=${IMAGE_TAG} docker compose up -d"
-                    """
-                }
-            // Ensure BUILD_NUMBER is available for docker-compose
-            // sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
             }
-        }
-    }
-    post {
-        success {
-            slackSend(
-                channel: env.SLACK_CHANNEL,
-                message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-            )
-        }
-        failure {
-            slackSend(
-                channel: env.SLACK_CHANNEL,
-                message: "❌ Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-            )
-        }
-        unstable {
-            slackSend(
-                channel: env.SLACK_CHANNEL,
-                message: "⚠️ Pipeline UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-            )
-        }
+            }        
+    //     stage('build docker image') {
+    //         when {
+    //             expression { return params.PIPELINE_ACTION == 'build only' || params.PIPELINE_ACTION == 'build & deploy' }
+    //         }
+
+    //         steps {
+    //             sh """
+    //                 docker build -t ${env.IMAGE_NAME}:${IMAGE_TAG}  .
+    //                 cd nginx
+    //                 docker build -t nouraldeen152/nginx_reverse_proxy:${IMAGE_TAG}  .
+    //             """
+    //         }
+    //     }
+    //     stage('Push Docker Image') {
+    //         when {
+    //             expression { return params.PIPELINE_ACTION == 'build only' || params.PIPELINE_ACTION == 'build & deploy' }
+    //         }
+    //         steps {
+    //             echo 'push images in my public regitry '
+    //             withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+
+    //                 sh """
+
+    //                     docker push ${env.IMAGE_NAME}:${env.IMAGE_TAG}
+    //                     docker push nouraldeen152/nginx_reverse_proxy:${env.IMAGE_TAG}
+    //                 """
+    //             }
+    //         }
+    //     }
+
+    //     stage('test') {
+    //         steps {
+    //             sh 'echo test stage'
+    //         }
+    //     }
+
+    //     stage('Deploy to Kubernetes') {
+    //         when {
+    //             allOf {
+    //                     expression { return params.DEPLOY_TARGET == 'kubernetes' || params.DEPLOY_TARGET == 'both' }
+    //                     expression { return params.PIPELINE_ACTION == 'deploy only' || params.PIPELINE_ACTION == 'build & deploy' }
+    //                 }
+    //         }
+    //         steps {
+    //                 withCredentials([string(credentialsId: 'kubeconfig-secret', variable: 'KUBECONFIG_BASE64')]) {
+    //                     // Decode the kubeconfig and write it to a file
+    //                     sh """
+    //                         mkdir -p ${WORKSPACE}/.kube
+    //                         echo ${KUBECONFIG_BASE64} | base64 --decode > ${KUBECONFIG}
+    //                         chmod 600 ${KUBECONFIG}
+    //                     """
+    //                     dir('kubernates/') {
+    //                     sh """
+    //                     kubectl get nodes --kubeconfig=${KUBECONFIG}
+    //                     echo ${KUBECONFIG}
+    //                     export KUBECONFIG=${KUBECONFIG}
+    //                     chmod +x ./manage.sh 
+    //                     ./manage.sh apply
+    //                       """
+    //                  }
+
+    //                 }           
+    //          }
+    //     }
+
+    //     stage('Deploy to Docker') {
+    //         when {
+    //                 allOf {
+    //                     expression { return params.DEPLOY_TARGET == 'docker' || params.DEPLOY_TARGET == 'both' }
+    //                     expression { return params.PIPELINE_ACTION == 'deploy only' || params.PIPELINE_ACTION == 'build & deploy' }
+    //                 }
+    //             }
+    //         steps {
+    //             sshagent(['jenkins-remote-credentials']) {
+    //                 sh """
+    //                     scp docker-compose.yml ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}/
+    //                     ssh ${REMOTE_USER}@${REMOTE_HOST} "cd ${REMOTE_DIR}  && BUILD_NUMBER=${IMAGE_TAG} docker compose up -d"
+    //                 """
+    //             }
+    //         // Ensure BUILD_NUMBER is available for docker-compose
+    //         // sh "BUILD_NUMBER=${BUILD_NUMBER} docker compose up -d"
+    //         }
+    //     }
+    // }
+    // post {
+    //     success {
+    //         slackSend(
+    //             channel: env.SLACK_CHANNEL,
+    //             message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+    //         )
+    //     }
+    //     failure {
+    //         slackSend(
+    //             channel: env.SLACK_CHANNEL,
+    //             message: "❌ Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+    //         )
+    //     }
+    //     unstable {
+    //         slackSend(
+    //             channel: env.SLACK_CHANNEL,
+    //             message: "⚠️ Pipeline UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+    //         )
+    //     }
     }
 }
