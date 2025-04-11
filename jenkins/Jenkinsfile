@@ -32,7 +32,6 @@ pipeline {
             parallel {
                 // Branch to handle infrastructure setup (Ansible and Terraform)
                 stage('Infra') {
-                    parallel {
                         // Sub-stage to prep on-prem K8s cluster with Ansible
                         stage('Ansible') {
                             when {
@@ -58,7 +57,7 @@ pipeline {
                                 }
                             }
                         }
-                    }
+                    
                 }
                 // Branch to build and push Docker image
                 stage('Image') {
