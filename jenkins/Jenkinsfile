@@ -29,10 +29,7 @@ pipeline {
 stages {
     stage('Setup') {
         steps {
-                     // Log for debugging
-                    sh  """
-                            echo "fuck me"
-                        """
+
                 script {
                     // Define config file path in repo
                     def configFile = '../deploy.conf'
@@ -41,9 +38,16 @@ stages {
                     def pipelineAction = params.PIPELINE_ACTION
                     def customBuildNumber = params.CUSTOM_BUILD_NUMBER
                     def skipTests = params.SKIP_TESTS
-
+                     // Log for debugging
+                    sh  """
+                            echo "fuck you"
+                        """
                     // Check if config file exists
                     if (fileExists(configFile)) {
+                     // Log for debugging
+                    sh  """
+                            echo "fuck me"
+                        """
                         // Read file content
                         def config = readFile(configFile).trim()
                         // Parse each parameter using regex
