@@ -52,7 +52,7 @@ stages {
     
             """
                     // Check if config file exists
-                    if (fileExists("${WORKSPACE}/deploy.conf")) {
+                    if (fileExists('deploy.conf')) {
                       echo "File src/main/resources/index.html found!"   
                      // Log for debugging
 
