@@ -43,6 +43,12 @@ stages {
                     sh  """
                             echo "fuck you"
                         """
+                        echo "Current workspace: ${WORKSPACE}"
+            sh """
+                pwd
+                ls -l ${WORKSPACE}
+                ls -l .
+            """
                     // Check if config file exists
                     if (fileExists(configFile)) {
                      // Log for debugging
