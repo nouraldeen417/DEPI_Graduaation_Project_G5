@@ -27,24 +27,20 @@ pipeline {
         SLACK_CHANNEL = '#team-project' // Slack channel to send notifications
     }
 stages {
-    stage('Setup') {
-        steps {
-
+stage('Setup') {
+            steps {
                 script {
-                    // Define config file path in repo
-                    def configFile = "${WORKSPACE}/deploy.conf"
-    
-                    // Initialize with defaults from parameters
-            def deployParams = [
-                DEPLOY_TARGET: params.DEPLOY_TARGET,
-                PIPELINE_ACTION: params.PIPELINE_ACTION,
-                CUSTOM_BUILD_NUMBER: params.CUSTOM_BUILD_NUMBER,
-                SKIP_TESTS: params.SKIP_TESTS
-            ] 
-                   if (fileExists('deploy.conf')) {
-                      echo "File src/main/resources/index.html found!"   
-                     //Log for debugging
+                    // Define config file path
+                    def configFile = 'deploy.conf' // Matches <workspace>/deploy.conf
+                    // Initialize env variables with hardcoded defaults
+                    env.DEPLOY_TARGET = 'docker'          // Default if deploy.conf is missing
+                    env.PIPELINE_ACTION = 'build & deploy'
+                    env.CUSTOM_BUILD_NUMBER = ''          // Empty default
+                    env.SKIP_TESTS = 'false'
 
+                    // Check if config file exists
+                    if (fileExists(configFile)) {
+                        echo "Found ${configFile}"
                         // Read file content
                         def config = readFile(configFile).trim()
                         // Parse each parameter using regex
@@ -53,43 +49,37 @@ stages {
                         // DEPLOY_TARGET
                         matcher = config =~ /DEPLOY_TARGET=([^\n]*)/
                         if (matcher && matcher[0][1] in ['kubernetes', 'docker', 'both']) {
-                            deployTarget = matcher[0][1]
+                            env.DEPLOY_TARGET = matcher[0][1]
                         }
 
                         // PIPELINE_ACTION
                         matcher = config =~ /PIPELINE_ACTION=([^\n]*)/
                         if (matcher && matcher[0][1] in ['build & deploy', 'build only', 'deploy only']) {
-                            pipelineAction = matcher[0][1]
+                            env.PIPELINE_ACTION = matcher[0][1]
                         }
 
                         // CUSTOM_BUILD_NUMBER
                         matcher = config =~ /CUSTOM_BUILD_NUMBER=([^\n]*)/
                         if (matcher && matcher[0][1]) {
-                            customBuildNumber = matcher[0][1]
+                            env.CUSTOM_BUILD_NUMBER = matcher[0][1]
                         }
 
                         // SKIP_TESTS
                         matcher = config =~ /SKIP_TESTS=([^\n]*)/
                         if (matcher && matcher[0][1] in ['true', 'false']) {
-                            skipTests = matcher[0][1] == 'true'
+                            env.SKIP_TESTS = matcher[0][1]
                         }
+                    } else {
+                        echo "Warning: ${configFile} not found, using hardcoded defaults"
                     }
-                else {
-                    echo "Warning: ${configFile} not found, using default parameters"
-                        }
-
-            // Use env instead of params
-            env.DEPLOY_TARGET = deployParams.DEPLOY_TARGET
-            env.PIPELINE_ACTION = deployParams.PIPELINE_ACTION
-            env.CUSTOM_BUILD_NUMBER = deployParams.CUSTOM_BUILD_NUMBER
-            env.SKIP_TESTS = deployParams.SKIP_TESTS.toString()                }
-                                    // Log for debugging
-                    sh  """
-                            echo "Set parameters: DEPLOY_TARGET=${params.DEPLOY_TARGET}, PIPELINE_ACTION=${params.PIPELINE_ACTION}, CUSTOM_BUILD_NUMBER=${params.CUSTOM_BUILD_NUMBER}, SKIP_TESTS=${params.SKIP_TESTS}"
-                        """
+                }
+                // Log to confirm values
+                sh """
+                    echo "Set parameters: DEPLOY_TARGET=${env.DEPLOY_TARGET}, PIPELINE_ACTION=${env.PIPELINE_ACTION}, CUSTOM_BUILD_NUMBER=${env.CUSTOM_BUILD_NUMBER}, SKIP_TESTS=${env.SKIP_TESTS}"
+                """
             }
-            }        
-        stage('build docker image') {
+        }
+      stage('build docker image') {
             when {
                 expression { return params.PIPELINE_ACTION == 'build only' || params.PIPELINE_ACTION == 'build & deploy' }
             }
