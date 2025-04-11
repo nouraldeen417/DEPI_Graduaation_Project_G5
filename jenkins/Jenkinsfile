@@ -29,6 +29,10 @@ pipeline {
 stages {
     stage('Setup') {
         steps {
+                     // Log for debugging
+                    sh  """
+                            echo "fuck me"
+                        """
                 script {
                     // Define config file path in repo
                     def configFile = '../deploy.conf'
@@ -76,11 +80,12 @@ stages {
                     params.CUSTOM_BUILD_NUMBER = customBuildNumber
                     params.SKIP_TESTS = skipTests
 
-                    // Log for debugging
+
+                }
+                                    // Log for debugging
                     sh  """
                             echo "Set parameters: DEPLOY_TARGET=${params.DEPLOY_TARGET}, PIPELINE_ACTION=${params.PIPELINE_ACTION}, CUSTOM_BUILD_NUMBER=${params.CUSTOM_BUILD_NUMBER}, SKIP_TESTS=${params.SKIP_TESTS}"
                         """
-                }
             }
             }        
         stage('build docker image') {
