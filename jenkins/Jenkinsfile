@@ -32,7 +32,8 @@ stages {
 
                 script {
                     // Define config file path in repo
-                    def configFile = 'deploy.conf'
+                    def configFile = "${WORKSPACE}/deploy.conf"
+    
                     // Initialize with defaults from parameters
                     def deployTarget = params.DEPLOY_TARGET
                     def pipelineAction = params.PIPELINE_ACTION
