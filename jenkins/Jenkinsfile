@@ -116,12 +116,12 @@ pipeline {
                         // ansible-playbook site.yml -e "selected_roles='docker_install'"
                         // Runs Ansible to install packages (e.g., Docker) on target environments
                         ansiblePlaybook(
-                        playbook: "${env.WORKSPACE}/ansible/site.yml",
-                        inventory: "${env.WORKSPACE}/ansible/hosts",
+                        playbook: "ansible/site.yml",
+                        inventory: "ansible/hosts",
                         credentialsId: '', // Leave empty since we’re using a dynamic key
                         extraVars: [
                             selected_roles: 'docker_install',
-                            ansible_ssh_private_key_file: "${env.WORKSPACE}/terraform/ssh-key-pair.pem"
+                            ansible_ssh_private_key_file: "terraform/ssh-key-pair.pem"
                         ]
                     )
                     }
