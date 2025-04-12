@@ -1,7 +1,6 @@
 # main.tf
 provider "aws" {
   region  = "us-east-1"
-  # profile = "aws" # Use the default profile
   # access_key                  = "test"       # Fake credentials
   # secret_key                  = "test"       # Fake credentials
   # s3_use_path_style           = true # 👈 Critical for LocalStack
@@ -18,7 +17,6 @@ terraform {
     bucket = "nour-tfstate"  # Match your bucket name
     key    = "terraform.tfstate"              # Path to state file in bucket
     region = "us-east-1"                      # Match your bucket’s region
-    # profile = "aws" 
   }
 }
 
