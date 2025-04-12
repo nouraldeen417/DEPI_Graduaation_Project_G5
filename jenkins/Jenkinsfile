@@ -118,11 +118,11 @@ pipeline {
                         ansiblePlaybook(
                         playbook: "ansible/site.yml",
                         inventory: "ansible/hosts",
-                        credentialsId: '', // Leave empty since we’re using a dynamic key
-                        extraVars: [
-                            selected_roles: 'docker_install',
-                            ansible_ssh_private_key_file: "terraform/ssh-key-pair.pem"
-                        ]
+                        // credentialsId: '', // Leave empty since we’re using a dynamic key
+                        // extraVars: [
+                        //     selected_roles: 'docker_install',
+                        //     ansible_ssh_private_key_file: "terraform/ssh-key-pair.pem"
+                        // ]
                     )
                     }
                 }
