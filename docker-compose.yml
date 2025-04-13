@@ -7,8 +7,8 @@ services:
     volumes:
       - staticfiles:/app/djangoapp/staticfiles  # Mount staticfiles volume
     environment:
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,192.168.1.150
-      - DJANGO_TRUSTED_ORIGIN=http://localhost:30008       
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,${HOST_IP} 
+      - DJANGO_TRUSTED_ORIGIN=http://localhost,http://${HOST_IP}    
            
 
   nginx:

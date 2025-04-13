@@ -15,3 +15,4 @@
     chdir: "{{ ansible_home }}"
   environment:
     BUILD_NUMBER: "{{ IMAGE_TAG }}"
+    HOST_IP: "{{ ansible_host }}"
