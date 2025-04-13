@@ -190,6 +190,7 @@ pipeline {
                                 // credentialsId: '', // Leave empty since we’re using a dynamic key
                                 extraVars: [
                                     selected_roles: 'docker_compose',
+                                    IMAGE_TAG: "${IMAGE_TAG}",
                                     ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
                                 ]
                             )
@@ -224,10 +225,11 @@ pipeline {
         
        
         post {
+            always {
+                            sh 'rm -rf .ssh'
+                    }
             success {
-                always {
-                             sh 'rm -rf .ssh'
-                        }
+
                 slackSend(
                     channel: env.SLACK_CHANNEL,
                     message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
