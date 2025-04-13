@@ -31,7 +31,7 @@ pipeline {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'aws_ec2_ssh_key', keyFileVariable: 'SSH_KEY',usernameVariable: 'USERNAME')]) {
                 sh """
-                    mkdir -p .ssh
+                   [ -d .ssh ] || mkdir -p .ssh
                     cat $SSH_KEY > .ssh/ssh_key.pem
                     chmod 400 .ssh/ssh_key.pem
                     echo "ssh_key_file=\\".ssh/ssh_key.pem\\"" >> terraform.tfvars
@@ -181,9 +181,18 @@ pipeline {
                                 }
                             steps {
                                 sh """
-                                cp docker-compose.yml ansible/role/docker_compose/files/docker-compose.yml
-                                ansible-playbook ansible/deploy-prep.yml -e "selected_roles='docker_install'"
+                                cp docker-compose.yml ansible/roles/docker_compose/files/docker-compose.yml
                                 """
+                                                        // Runs Ansible to install packages (e.g., Docker) on target environments
+                                ansiblePlaybook(
+                                playbook: "ansible/site.yml",
+                                inventory: "ansible/hosts",
+                                // credentialsId: '', // Leave empty since we’re using a dynamic key
+                                extraVars: [
+                                    selected_roles: 'docker_compose',
+                                    ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
+                                ]
+                            )
                             }
                         }
                         // Deployment to on-prem non-K8s environment
