@@ -42,8 +42,8 @@ module "security" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
-  ssh_key_pair = "ssh-key-pair"
-  ssh_key_path = "."
+  # ssh_key_pair = "ssh-key-network-app"
+  # ssh_key_path = "."
 }
 
 module "compute" {
@@ -59,7 +59,7 @@ module "compute" {
       assign_public_ip   = true,                               # <-- Enable public IP
       security_group_ids = [module.security.security_group_id] # Attach SG
       # user_data        = file("./user.sh "),  # Optional user data script
-      key_name = module.security.ssh_key_pair_name # Optional SSH key
+      key_name = "my-key" # Optional SSH key
     }
   ]
 
@@ -77,7 +77,7 @@ resource "null_resource" "setup_management" {
     connection {
       type        = "ssh"
       user        = "ubuntu"  # Adjust per AMI
-      private_key = file(module.security.ssh_key_pair_path)  # Path to the SSH key
+      private_key = file(var.ssh_key_file)  # Path to the SSH key
       host        = module.compute.instance_public_ip[0]
     }
   }
@@ -91,7 +91,7 @@ resource "null_resource" "setup_management" {
     connection {
       type        = "ssh"
       user        = "ubuntu"  # Adjust per AMI
-      private_key = file(module.security.ssh_key_pair_path)  # Path to the SSH key
+      private_key = file(var.ssh_key_file)  # Path to the SSH key
       host        = module.compute.instance_public_ip[0]
     }
   }
@@ -103,7 +103,7 @@ provisioner "local-exec" {
                 if ! grep -q '[aws_ec2]' ../ansible/hosts; then
                     echo '[aws_ec2]' >> ../ansible/hosts;   
                fi
-                sed -i '/^\[aws_ec2\]$/a ${module.compute.instance_public_ip[0]} ansible_user=management ansible_ssh_private_key_file=${module.security.ssh_key_pair_path}' ../ansible/hosts;
+                sed -i '/^\[aws_ec2\]$/a ${module.compute.instance_public_ip[0]} ansible_user=management ansible_ssh_private_key_file=${var.ssh_key_file}' ../ansible/hosts;
 
                 EOT
   }  

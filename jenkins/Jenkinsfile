@@ -27,6 +27,18 @@ pipeline {
         SLACK_CHANNEL = '#team-project' // Slack channel to send notifications
     }
     stages {
+        stage('Prepare SSH Key') {
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: 'aws_ec2_ssh_key', keyFileVariable: 'SSH_KEY',usernameVariable: 'USERNAME')]) {
+                sh """
+                    mkdir -p .ssh
+                    cat $SSH_KEY > .ssh/ssh_key.pem
+                    chmod 400 .ssh/ssh_key.pem
+                    echo "ssh_key_file=\\".ssh/ssh_key.pem\\"" >> terraform.tfvars
+                """
+                }
+            }
+        }
             // Stage to prepare infra and build images in parallel
         stage('Prep') {
             parallel {
@@ -52,10 +64,10 @@ pipeline {
                             steps {
                                 dir('terraform/') {
                                   withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                                    sh """
-                                        terraform init -reconfigure
-                                        terraform apply -auto-approve 
-                                    """
+                                        sh """
+                                            terraform init -reconfigure
+                                            terraform apply -auto-approve 
+                                        """ 
   
                                     }
                                 }
@@ -119,10 +131,10 @@ pipeline {
                         playbook: "ansible/site.yml",
                         inventory: "ansible/hosts",
                         // credentialsId: '', // Leave empty since we’re using a dynamic key
-                        // extraVars: [
-                        //     selected_roles: 'docker_install',
-                        //     ansible_ssh_private_key_file: "terraform/ssh-key-pair.pem"
-                        // ]
+                        extraVars: [
+                            selected_roles: 'docker_install',
+                            ansible_ssh_private_key_file: ".ssh/ssh_key.pem"
+                        ]
                     )
                     }
                 }

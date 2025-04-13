@@ -112,3 +112,10 @@ variable "security_group_name" {
   default     = "allow_ssh"
   description = "allow ssh inbound traffic and all outbound traffic"
 }
+
+
+variable ssh_key_file {
+  type        = string
+  default     = "~/.ssh/ssh-aws.pem"
+  description = "provide a key path for the ssh key"
+}
