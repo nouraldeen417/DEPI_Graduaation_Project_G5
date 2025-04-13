@@ -225,6 +225,9 @@ pipeline {
        
         post {
             success {
+                always {
+                             sh 'rm -rf .ssh'
+                        }
                 slackSend(
                     channel: env.SLACK_CHANNEL,
                     message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
