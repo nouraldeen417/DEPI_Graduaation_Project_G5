@@ -133,7 +133,7 @@ pipeline {
                         // credentialsId: '', // Leave empty since we’re using a dynamic key
                         extraVars: [
                             selected_roles: 'docker_install',
-                            ansible_ssh_private_key_file: ".ssh/ssh_key.pem"
+                            ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
                         ]
                     )
                     }
