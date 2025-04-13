@@ -10,6 +10,6 @@
     dest: "{{ ansible_home }}/docker-compose.yml"
 
 - name: Run Docker Compose from home directory
-  ansible.builtin.command: "docker-compose -f {{ ansible_home }}/docker-compose.yml up -d"
+  ansible.builtin.command: "docker compose -f {{ ansible_home }}/docker-compose.yml up -d"
   args:
     chdir: "{{ ansible_home }}"
