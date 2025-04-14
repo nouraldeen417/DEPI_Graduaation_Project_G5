@@ -1,162 +1,261 @@
 pipeline {
     agent any
-    // Define a multi-select parameter to choose deployment targets (k8s, aws, onprem)
     parameters {
-        string(name: 'DEPLOY_TO', defaultValue: 'k8s,aws,onprem', description: 'Comma-separated targets: k8s,aws,onprem')
+        choice(name: 'PIPELINE_ACTION', choices: ['build & deploy', 'build only', 'deploy only'], description: 'Choose pipeline action')
+        string(name: 'CUSTOM_BUILD_NUMBER', defaultValue: "${BUILD_NUMBER}", description: 'Image tag (default: BUILD_NUMBER)')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
+        
+        // Checkbox-style environment selection
+        booleanParam(name: 'DEPLOY_K8S', defaultValue: false, description: 'Deploy to Kubernetes')
+        booleanParam(name: 'DEPLOY_AWS', defaultValue: false, description: 'Deploy to AWS')
+        booleanParam(name: 'DEPLOY_ONPREM', defaultValue: false, description: 'Deploy to On-Prem')
     }
+
+    environment {
+        DOCKER_REGISTRY = 'your-docker-registry'
+        IMAGE_NAME = "nouraldeen152/networkapp"
+        IMAGE_TAG = "${params.CUSTOM_BUILD_NUMBER}"
+        REMOTE_USER = 'jenkins-remote'
+        REMOTE_HOST = '192.168.1.150'
+        REMOTE_DIR = "/home/jenkins-remote/"
+        KUBECONFIG = "${WORKSPACE}/.kube/config"
+    }
+
     stages {
-        // Stage for initial checks (e.g., validate parameters)
-        stage('Setup') {
+        // Stage 1: Setup (hardcoded)
+        stage('Setup Environment') {
             steps {
-                echo "Running for DEPLOY_TO=${params.DEPLOY_TO}"
-                // Add checks here (e.g., validate DEPLOY_TO values)
+                script {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'aws_ec2_ssh_key', keyFileVariable: 'SSH_KEY')]) {
+                        sh """
+                            mkdir -p .ssh
+                            cat $SSH_KEY > .ssh/ssh_key.pem
+                            chmod 400 .ssh/ssh_key.pem
+                            echo 'ssh_key_file=".ssh/ssh_key.pem"' >> terraform.tfvars
+                        """
+                    }
+                }
             }
         }
-        // Stage to prepare infra and build images in parallel
-        stage('Prep') {
+
+        // Stage 2: Parallel Build Phase
+        stage('Build Phase') {
+            when {
+                expression { params.PIPELINE_ACTION in ['build only', 'build & deploy'] }
+            }
             parallel {
-                // Branch to handle infrastructure setup (Ansible and Terraform)
-                stage('Infra') {
-                    parallel {
-                        // Sub-stage to prep on-prem K8s cluster with Ansible
-                        stage('Ansible') {
-                            steps {
-                                // Runs playbook to set up K8s cluster on-prem
-                                // Uses DEPLOY_TO to customize if needed (e.g., specific nodes)
-                                sh "ansible-playbook ansible/prep-k8s.yml -e deploy_to=${params.DEPLOY_TO}"
-                            }
-                        }
-                        // Sub-stage to provision AWS resources with Terraform
-                        stage('Terraform') {
-                            steps {
-                                // Initializes Terraform (e.g., for AWS EC2, VPC)
-                                sh "terraform -chdir=terraform init"
-                                // Applies Terraform config for AWS resources
-                                sh "terraform -chdir=terraform apply -auto-approve -var deploy_to=${params.DEPLOY_TO}"
-                            }
+                // Parallel Image Building
+                stage('Build Images') {
+                    steps {
+                        script {
+                            images.prepare()
+                            images.build()
                         }
                     }
                 }
-                // Branch to build and push Docker image
-                stage('Image') {
-                    stages {
-                        // Sub-stage to build the app’s Docker image
-                        stage('Build') {
-                            steps {
-                                // Builds image (replace with your Dockerfile path)
-                                sh 'docker build -t my-app:latest .'
-                            }
-                        }
-                        // Sub-stage to push image to registry
-                        stage('Push') {
-                            steps {
-                                // Pushes image (replace with your registry, e.g., ECR)
-                                sh 'docker push my-app:latest'
-                            }
+
+                // Parallel Infrastructure Setup
+                stage('Build Infrastructure') {
+                    steps {
+                        script {
+                            if (params.DEPLOY_K8S) { k8s.buildInfra() }
+                            if (params.DEPLOY_AWS) { aws.buildInfra() }
+                            if (params.DEPLOY_ONPREM) { onprem.buildInfra() }
                         }
                     }
                 }
             }
         }
-        // Stage to deploy the app to chosen targets
-        stage('Deploy') {
-            stages {
-                // Sub-stage to prepare deployment environment
-                stage('Prep Environment') {
+
+        // Stage 3: Push Images
+        stage('Push Images') {
+            when {
+                expression { params.PIPELINE_ACTION in ['build only', 'build & deploy'] }
+            }
+            steps {
+                script {
+                    images.push()
+                }
+            }
+        }
+
+        // Stage 4: Testing
+        stage('Testing') {
+            when {
+                allOf {
+                    expression { !params.SKIP_TESTS }
+                    expression { params.PIPELINE_ACTION in ['build & deploy', 'deploy only'] }
+                }
+            }
+            steps {
+                echo 'Running test suite...'
+                // Add your test commands here
+            }
+        }
+
+        // Stage 5: Parallel Deploy Phase
+        stage('Deploy Phase') {
+            when {
+                expression { params.PIPELINE_ACTION in ['deploy only', 'build & deploy'] }
+            }
+            parallel {
+                // Kubernetes Deployment
+                stage('Deploy to K8s') {
+                    when { expression { params.DEPLOY_K8S } }
                     steps {
-                        // Runs Ansible to install packages (e.g., Docker) on target environments
-                        sh "ansible-playbook ansible/deploy-prep.yml -e deploy_to=${params.DEPLOY_TO}"
+                        script {
+                            k8s.prepare()
+                            k8s.deploy()
+                        }
                     }
                 }
-                // Sub-stage to deploy to all selected targets in parallel
-                stage('Deploy App') {
-                    parallel {
-                        // Deployment to on-prem K8s cluster
-                        stage('Deploy K8s') {
-                            // Runs only if 'k8s' is in DEPLOY_TO
-                            when { expression { 'k8s' in params.DEPLOY_TO.split(',') } }
-                            steps {
-                                // Deploys to K8s (e.g., via Ansible or Helm)
-                                sh "ansible-playbook ansible/deploy-k8s.yml -e deploy_to=${params.DEPLOY_TO}"
-                            }
+
+                // AWS Deployment
+                stage('Deploy to AWS') {
+                    when { expression { params.DEPLOY_AWS } }
+                    steps {
+                        script {
+                            aws.prepare()
+                            aws.deploy()
                         }
-                        // Deployment to AWS EC2 with Docker
-                        stage('Deploy AWS') {
-                            // Runs only if 'aws' is in DEPLOY_TO
-                            when { expression { 'aws' in params.DEPLOY_TO.split(',') } }
-                            steps {
-                                // Deploys to AWS EC2 (e.g., via Ansible script)
-                                sh "ansible-playbook ansible/deploy-aws.yml -e deploy_to=${params.DEPLOY_TO}"
-                            }
-                        }
-                        // Deployment to on-prem non-K8s environment
-                        stage('Deploy On-Prem') {
-                            // Runs only if 'onprem' is in DEPLOY_TO
-                            when { expression { 'onprem' in params.DEPLOY_TO.split(',') } }
-                            steps {
-                                // Deploys to on-prem (e.g., via Ansible for Docker)
-                                sh "ansible-playbook ansible/deploy-onprem.yml -e deploy_to=${params.DEPLOY_TO}"
-                            }
+                    }
+                }
+
+                // OnPrem Deployment
+                stage('Deploy to OnPrem') {
+                    when { expression { params.DEPLOY_ONPREM } }
+                    steps {
+                        script {
+                            onprem.prepare()
+                            onprem.deploy()
                         }
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up workspace...'
+            sh 'rm -rf .ssh'
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
 
+// ===== SHARED MODULES ===== //
 
-stage('Setup') {
-    steps {
-        script {
-            // Define config file path in repo
-            def configFile = 'deploy.conf'
-            // Initialize with defaults from parameters
-            def deployTarget = params.DEPLOY_TARGET
-            def pipelineAction = params.PIPELINE_ACTION
-            def customBuildNumber = params.CUSTOM_BUILD_NUMBER
-            def skipTests = params.SKIP_TESTS
+def images = {
+    prepare: {
+        echo "Preparing image build environment for ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+    },
+    build: {
+        sh """
+            docker build -t ${env.IMAGE_NAME}:${env.IMAGE_TAG} .
+            cd nginx
+            docker build -t ${env.IMAGE_NAME}/nginx_reverse_proxy:${env.IMAGE_TAG} .
+        """
+    },
+    push: {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+            sh """
+                docker login -u $USER -p $PASS ${env.DOCKER_REGISTRY}
+                docker push ${env.IMAGE_NAME}:${env.IMAGE_TAG}
+                docker push ${env.IMAGE_NAME}/nginx_reverse_proxy:${env.IMAGE_TAG}
+            """
+        }
+    }
+}
 
-            // Check if config file exists
-            if (fileExists(configFile)) {
-                // Read file content
-                def config = readFile(configFile).trim()
-                // Parse each parameter using regex
-                def matcher
+// ===== ENVIRONMENT MODULES ===== //
 
-                // DEPLOY_TARGET
-                matcher = config =~ /DEPLOY_TARGET=([^\n]*)/
-                if (matcher && matcher[0][1] in ['kubernetes', 'docker', 'both']) {
-                    deployTarget = matcher[0][1]
-                }
+def k8s = {
+    buildInfra: {
+        echo "Building Kubernetes infrastructure"
+        sh 'ansible-playbook k8s/setup-cluster.yml'
+    },
+    prepare: {
+        echo "Preparing Kubernetes environment"
+        withCredentials([string(credentialsId: 'kubeconfig-secret', variable: 'KUBECONFIG_BASE64')]) {
+            sh """
+                mkdir -p ${env.KUBECONFIG}
+                echo ${KUBECONFIG_BASE64} | base64 --decode > ${env.KUBECONFIG}
+                chmod 600 ${env.KUBECONFIG}
+            """
+        }
+    },
+    deploy: {
+        echo "Deploying to Kubernetes"
+        dir('kubernetes/') {
+            sh """
+                kubectl get nodes --kubeconfig=${env.KUBECONFIG}
+                ./manage.sh apply
+            """
+        }
+    }
+}
 
-                // PIPELINE_ACTION
-                matcher = config =~ /PIPELINE_ACTION=([^\n]*)/
-                if (matcher && matcher[0][1] in ['build & deploy', 'build only', 'deploy only']) {
-                    pipelineAction = matcher[0][1]
-                }
-
-                // CUSTOM_BUILD_NUMBER
-                matcher = config =~ /CUSTOM_BUILD_NUMBER=([^\n]*)/
-                if (matcher && matcher[0][1]) {
-                    customBuildNumber = matcher[0][1]
-                }
-
-                // SKIP_TESTS
-                matcher = config =~ /SKIP_TESTS=([^\n]*)/
-                if (matcher && matcher[0][1] in ['true', 'false']) {
-                    skipTests = matcher[0][1] == 'true'
-                }
+def aws = {
+    buildInfra: {
+        echo "Building AWS infrastructure"
+        dir('terraform/') {
+            withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+                            credentialsId: 'aws-credentials', 
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                sh """
+                    terraform init -reconfigure
+                    terraform apply -auto-approve
+                """
             }
+        }
+    },
+    prepare: {
+        echo "Preparing AWS environment"
+        sh "cp docker-compose.yml ansible/roles/docker_compose/files/"
+        ansiblePlaybook(
+            playbook: "ansible/site.yml",
+            inventory: "ansible/hosts",
+            extraVars: [
+                selected_roles: 'docker_install',
+                ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
+            ]
+        )
+    },
+    deploy: {
+        echo "Deploying to AWS"
+        ansiblePlaybook(
+            playbook: "ansible/site.yml",
+            inventory: "ansible/hosts",
+            extraVars: [
+                selected_roles: 'docker_compose',
+                IMAGE_TAG: "${env.IMAGE_TAG}",
+                ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
+            ]
+        )
+    }
+}
 
-            // Override parameters
-            params.DEPLOY_TARGET = deployTarget
-            params.PIPELINE_ACTION = pipelineAction
-            params.CUSTOM_BUILD_NUMBER = customBuildNumber
-            params.SKIP_TESTS = skipTests
-
-            // Log for debugging
-            echo "Set parameters: DEPLOY_TARGET=${params.DEPLOY_TARGET}, PIPELINE_ACTION=${params.PIPELINE_ACTION}, CUSTOM_BUILD_NUMBER=${params.CUSTOM_BUILD_NUMBER}, SKIP_TESTS=${params.SKIP_TESTS}"
+def onprem = {
+    buildInfra: {
+        echo "Building OnPrem infrastructure"
+        sh "ansible-playbook onprem/setup-servers.yml"
+    },
+    prepare: {
+        echo "Preparing OnPrem environment"
+    },
+    deploy: {
+        echo "Deploying to OnPrem"
+        sshagent(['jenkins-remote-credentials']) {
+            sh """
+                scp docker-compose.yml ${env.REMOTE_USER}@${env.REMOTE_HOST}:${env.REMOTE_DIR}/
+                ssh ${env.REMOTE_USER}@${env.REMOTE_HOST} "cd ${env.REMOTE_DIR} && BUILD_NUMBER=${env.IMAGE_TAG} docker compose up -d"
+            """
         }
     }
 }
