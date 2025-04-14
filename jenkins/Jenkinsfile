@@ -159,7 +159,7 @@ pipeline {
 }
 
 
-def images = {
+def images = [
     prepare: {
         echo "Preparing image build environment for ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
     },
@@ -181,11 +181,11 @@ def images = {
             """
         }
     }
-}
+]
 
 // ===== ENVIRONMENT MODULES ===== //
 
-def k8s = {
+def k8s = [
     buildInfra: {
         echo "Building Kubernetes infrastructure"
         // Placeholder for Kubernetes infrastructure setup
@@ -215,9 +215,9 @@ def k8s = {
         }
 
     }
-}
+]
 
-def aws = {
+def aws = [
     buildInfra: {
         echo "Building AWS infrastructure"
         dir('terraform/') {
@@ -263,9 +263,9 @@ def aws = {
             ]
         )
     }
-}
+]
 
-def onprem = {
+def onprem = [
     buildInfra: {
         echo "Building OnPrem infrastructure"
         // Placeholder for OnPrem infrastructure setup
@@ -303,4 +303,4 @@ def onprem = {
     
     }
 
-}
+]
