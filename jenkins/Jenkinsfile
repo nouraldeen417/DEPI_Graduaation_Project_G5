@@ -193,18 +193,6 @@ pipeline {
     }
     stages {
         // Stage 1: Setup (hardcoded)
-        stage('Setup Environment') {
-            steps {
-                withCredentials([sshUserPrivateKey(credentialsId: "${env.CREDENTIALS_AWS_SSH}", keyFileVariable: 'SSH_KEY',usernameVariable: 'USERNAME')]) {
-                sh """
-                   [ -d .ssh ] || mkdir -p .ssh
-                    cat $SSH_KEY > .ssh/ssh_key.pem
-                    chmod 400 .ssh/ssh_key.pem
-
-                """
-                }
-            }
-        }
 
         // Stage 2: Parallel Build Phase
         stage('Build Phase') {
