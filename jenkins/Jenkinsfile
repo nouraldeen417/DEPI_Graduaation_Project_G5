@@ -163,6 +163,7 @@ pipeline {
    }    
 
     environment {
+        HOST_SUBSET_ONPREM = 'on_prems'
         DOCKER_REGISTRY = 'your-docker-registry' // e.g., Docker Hub
         IMAGE_NAME = "nouraldeen152/networkapp"
         IMAGE_TAG =  "${params.CUSTOM_BUILD_NUMBER}" // Use custom build number or default to BUILD_NUMBER
