@@ -58,6 +58,17 @@ def k8s = [
 ]
 
 def aws = [
+    prepare: { 
+        echo "Prepare AWS infrastructure for building"
+        withCredentials([sshUserPrivateKey(credentialsId: "${env.CREDENTIALS_AWS_SSH}", keyFileVariable: 'SSH_KEY',usernameVariable: 'USERNAME')]) {
+            sh """
+                mkdir -p ${WORKSPACE}/.ssh
+                echo ${SSH_KEY} > .ssh/ssh_key.pem
+                chmod 400 .ssh/ssh_key.pem
+            """
+        }
+    },
+    // Build AWS infrastructure using Terraform    
     buildInfra: {
         echo "Building AWS infrastructure"
         dir('terraform/') {
@@ -66,13 +77,13 @@ def aws = [
                                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 sh """
                     terraform init  -upgrade 
-                    terraform apply -auto-approve 
+                    terraform apply -auto-approve -var="ssh_key_file=${env.AWS_SSH_KEY}" 
                 """ 
 
             }
         }
     },
-    prepare: {
+    prepare_deployment: {
         echo "Preparing AWS environment"
         ansiblePlaybook(
             playbook: "ansible/site.yml",
@@ -110,7 +121,7 @@ def onprem = [
         echo "Building OnPrem infrastructure"
         // Placeholder for OnPrem infrastructure setup
     },
-    prepare: {
+    prepare_deployment: {
         echo "Preparing OnPrem environment"
         // Runs Ansible to install packages (e.g., Docker) on target environments
         ansiblePlaybook(
@@ -177,6 +188,7 @@ pipeline {
         REMOTE_HOST = '192.168.1.150'
         REMOTE_DIR = "/home/jenkins-remote/"
         KUBECONFIG = "${WORKSPACE}/.kube/config"
+        AWS_SSH_KEY = "${WORKSPACE}/.ssh/ssh_key.pem"
         SLACK_CHANNEL = '#team-project' // Slack channel to send notifications
     }
     stages {
@@ -188,7 +200,7 @@ pipeline {
                    [ -d .ssh ] || mkdir -p .ssh
                     cat $SSH_KEY > .ssh/ssh_key.pem
                     chmod 400 .ssh/ssh_key.pem
-                    echo "ssh_key_file=\\".ssh/ssh_key.pem\\"" >> terraform.tfvars
+
                 """
                 }
             }
@@ -215,7 +227,7 @@ pipeline {
                     steps {
                         script {
                             if (params.DEPLOY_K8S) { k8s.buildInfra() }       // Not supported yet
-                            if (params.DEPLOY_AWS) { aws.buildInfra() }
+                            if (params.DEPLOY_AWS) { aws.prepare(); aws.buildInfra() }
                             if (params.DEPLOY_ONPREM) { onprem.buildInfra() } // Not supported yet
                         }
                     }
@@ -268,7 +280,7 @@ pipeline {
                     when { expression { params.DEPLOY_AWS } }
                     steps {
                         script {
-                            aws.prepare()
+                            aws.prepare_deployment()
                             aws.deploy()
                         }
                     }
@@ -279,7 +291,7 @@ pipeline {
                     when { expression { params.DEPLOY_ONPREM } }
                     steps {
                         script {
-                            onprem.prepare()
+                            onprem.prepare_deployment()
                             onprem.deploy()
                         }
                     }
