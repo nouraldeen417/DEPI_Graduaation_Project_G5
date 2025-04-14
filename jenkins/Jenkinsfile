@@ -118,10 +118,10 @@ def onprem = [
             playbook: "ansible/site.yml",
             inventory: "ansible/hosts",
             limit: "${env.HOST_SUBSET_ONPREM}",
-            // credentialsId: '', // Leave empty since we’re using a dynamic key
+            credentialsId: 'jenkins-remote-credentials', 
             extraVars: [
                 selected_roles: 'docker_install',
-                ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
+                ansible_os_family : 'RedHat'
             ]
         )
     },
@@ -135,7 +135,7 @@ def onprem = [
             playbook: "ansible/site.yml",
             inventory: "ansible/hosts",
             limit: "${env.HOST_SUBSET_ONPREM}",
-            credentialsId: 'jenkins-remote-credentials', // Leave empty since we’re using a dynamic key
+            credentialsId: 'jenkins-remote-credentials', 
             extraVars: [
                 selected_roles: 'docker_compose',
                 IMAGE_TAG: "${IMAGE_TAG}"
