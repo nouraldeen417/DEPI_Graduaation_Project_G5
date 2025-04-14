@@ -65,7 +65,7 @@ def aws = [
                                  credentialsId: "${env.CREDENTIALS_AWS_ACCOUNT}" , 
                                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 sh """
-                    terraform init -reconfigure
+                    terraform init  -upgrade 
                     terraform apply -auto-approve 
                 """ 
 
