@@ -79,7 +79,6 @@ def aws = [
                     terraform init  -upgrade 
                     terraform apply -auto-approve -var='ssh_key_file=${env.AWS_SSH_KEY}' 
                 """ 
-
             }
         }
     },

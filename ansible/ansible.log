@@ -382,3 +382,34 @@ core/2.18/reference_appendices/interpreter_discovery.html for more information.
 2025-04-10 23:42:34,500 p=11347 u=root n=ansible INFO| ok: [54.163.93.134]
 2025-04-10 23:42:34,527 p=11347 u=root n=ansible INFO| PLAY RECAP ***********************************************************************************************************************
 2025-04-10 23:42:34,528 p=11347 u=root n=ansible INFO| 54.163.93.134              : ok=5    changed=3    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+2025-04-15 13:52:23,714 p=3851 u=root n=ansible INFO| PLAY [Apply selected roles] ************************************************************************************************************
+2025-04-15 13:52:24,033 p=3851 u=root n=ansible INFO| TASK [Gathering Facts] *****************************************************************************************************************
+2025-04-15 13:52:25,516 p=3851 u=root n=ansible ERROR|  [ERROR]: User interrupted execution
+
+2025-04-15 13:52:33,984 p=3913 u=root n=ansible INFO| PLAY [Apply selected roles] ************************************************************************************************************
+2025-04-15 13:52:34,007 p=3913 u=root n=ansible INFO| TASK [Gathering Facts] *****************************************************************************************************************
+2025-04-15 13:52:37,116 p=3913 u=root n=ansible INFO| fatal: [server_01]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.1.150 port 22: No route to host", "unreachable": true}
+2025-04-15 13:52:42,878 p=3913 u=root n=ansible INFO| fatal: [13.217.82.116]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: Warning: Permanently added '13.217.82.116' (ED25519) to the list of known hosts.\r\nmanagement@13.217.82.116: Permission denied (publickey).", "unreachable": true}
+2025-04-15 13:52:42,878 p=3913 u=root n=ansible INFO| PLAY RECAP *****************************************************************************************************************************
+2025-04-15 13:52:42,878 p=3913 u=root n=ansible INFO| 13.217.82.116              : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+2025-04-15 13:52:42,879 p=3913 u=root n=ansible INFO| server_01                  : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+2025-04-15 13:53:43,384 p=4092 u=root n=ansible INFO| PLAY [Apply selected roles] ************************************************************************************************************
+2025-04-15 13:53:43,415 p=4092 u=root n=ansible INFO| TASK [Gathering Facts] *****************************************************************************************************************
+2025-04-15 13:53:44,888 p=4092 u=root n=ansible INFO| fatal: [13.217.82.116]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: management@13.217.82.116: Permission denied (publickey).", "unreachable": true}
+2025-04-15 13:53:46,561 p=4092 u=root n=ansible INFO| fatal: [server_01]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.1.150 port 22: No route to host", "unreachable": true}
+2025-04-15 13:53:46,562 p=4092 u=root n=ansible INFO| PLAY RECAP *****************************************************************************************************************************
+2025-04-15 13:53:46,562 p=4092 u=root n=ansible INFO| 13.217.82.116              : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+2025-04-15 13:53:46,562 p=4092 u=root n=ansible INFO| server_01                  : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+2025-04-15 14:36:33,606 p=6693 u=root n=ansible INFO| PLAY [Apply selected roles] ************************************************************************************************************
+2025-04-15 14:36:33,663 p=6693 u=root n=ansible INFO| TASK [Gathering Facts] *****************************************************************************************************************
+2025-04-15 14:36:36,815 p=6693 u=root n=ansible INFO| fatal: [server_01]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.1.150 port 22: No route to host", "unreachable": true}
+2025-04-15 14:36:59,019 p=6693 u=root n=ansible WARNING| [WARNING]: Platform linux on host 13.217.114.140 is using the discovered Python interpreter at /usr/bin/python3.12, but future
+installation of another Python interpreter could change the meaning of that path. See https://docs.ansible.com/ansible-
+core/2.18/reference_appendices/interpreter_discovery.html for more information.
+
+2025-04-15 14:36:59,020 p=6693 u=root n=ansible INFO| ok: [13.217.114.140]
+2025-04-15 14:36:59,041 p=6693 u=root n=ansible INFO| TASK [docker_install : Add Docker GPG key (Debian/Ubuntu)] *****************************************************************************
+2025-04-15 14:36:59,085 p=6693 u=root n=ansible INFO| fatal: [13.217.114.140]: FAILED! => {"msg": "The conditional check ''docker_install' in selected_roles ' failed. The error was: error while evaluating conditional ('docker_install' in selected_roles ): 'selected_roles' is undefined\n\nThe error appears to be in '/root/DEPI_Graduaation_Project_G5/ansible/roles/docker_install/tasks/main.yml': line 2, column 3, but may\nbe elsewhere in the file depending on the exact syntax problem.\n\nThe offending line appears to be:\n\n---\n- name: Add Docker GPG key (Debian/Ubuntu)\n  ^ here\n"}
+2025-04-15 14:36:59,089 p=6693 u=root n=ansible INFO| PLAY RECAP *****************************************************************************************************************************
+2025-04-15 14:36:59,091 p=6693 u=root n=ansible INFO| 13.217.114.140             : ok=1    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2025-04-15 14:36:59,092 p=6693 u=root n=ansible INFO| server_01                  : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   

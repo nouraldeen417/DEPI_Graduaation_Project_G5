@@ -9,7 +9,7 @@ sudo chmod 440 /etc/sudoers.d/management
 
 # Set up SSH directory and copy authorized_keys from the default user
 sudo mkdir -p /home/management/.ssh
-sudo cp "${HOME}/.ssh/authorized_keys" /home/management/.ssh/authorized_keys
+sudo cp "/home/ubuntu/.ssh/authorized_keys" /home/management/.ssh/authorized_keys
 
 # Set ownership and permissions
 sudo chown -R management:management /home/management/.ssh

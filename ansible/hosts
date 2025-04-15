@@ -1,9 +1,0 @@
-[all:vars]
-
-[aws_ec2]
-
-;ec2_01 ansible_host=192.168.2.1
-;ec2_02 ansible_host=192.168.3.2
-[on_prems]
-server_01 ansible_host=192.168.1.150
-;server_02 ansible_host=192.168.3.2
