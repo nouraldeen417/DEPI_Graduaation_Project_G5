@@ -3,8 +3,8 @@
   hosts: all
   become: yes
   become_method: sudo
-  environment:
-    ANSIBLE_SSH_ARGS: '-o StrictHostKeyChecking=accept-new'  # Alternative
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=accept-new'  # ✅ Correct syntax
 
 
   roles:
