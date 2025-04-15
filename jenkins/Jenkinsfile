@@ -91,7 +91,6 @@ def aws = [
             credentialsId: "${env.CREDENTIALS_AWS_SSH}", // Leave empty since we’re using a dynamic key
             extraVars: [
                 selected_roles: 'docker_install',
-                ANSIBLE_CONFIG: "${WORKSPACE}/ansible/ansible.cfg"
                 // ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
             ]
         )
@@ -110,7 +109,6 @@ def aws = [
             extraVars: [
                 selected_roles: 'docker_compose',
                 IMAGE_TAG: "${IMAGE_TAG}",
-                ANSIBLE_CONFIG: "${WORKSPACE}/ansible/ansible.cfg"
                 // ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
             ]
         )
@@ -132,8 +130,7 @@ def onprem = [
             credentialsId: "${env.CREDENTIALS_ONPREM_SERVER}", 
             extraVars: [
                 selected_roles: 'docker_install',
-                ansible_os_family : 'RedHat',
-                ANSIBLE_CONFIG : "${WORKSPACE}/ansible/ansible.cfg"
+                ansible_os_family : 'RedHat'
             ]
         )
     },
@@ -150,7 +147,6 @@ def onprem = [
             credentialsId: "${env.CREDENTIALS_ONPREM_SERVER}", 
             extraVars: [
                 selected_roles: 'docker_compose',
-                ANSIBLE_CONFIG: "${WORKSPACE}/ansible/ansible.cfg",
                 IMAGE_TAG: "${IMAGE_TAG}"
             ]
         )
