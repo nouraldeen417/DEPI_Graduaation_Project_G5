@@ -86,7 +86,7 @@ def aws = [
         echo "Preparing AWS environment"
         ansiblePlaybook(
             playbook: "ansible/site.yml",
-            inventory: "ansible/hosts",
+            inventory: "ansible/inventory/",
             limit: "${env.HOST_SUBSET_AWS}",
             credentialsId: "${env.CREDENTIALS_AWS_SSH}", // Leave empty since we’re using a dynamic key
             extraVars: [
@@ -103,7 +103,7 @@ def aws = [
         // Runs Ansible to run docker-compose on target environments
         ansiblePlaybook(
             playbook: "ansible/site.yml",
-            inventory: "ansible/hosts",
+            inventory: "ansible/inventory/",
             limit: "${env.HOST_SUBSET_AWS}",
             credentialsId: "${env.CREDENTIALS_AWS_SSH}", // Leave empty since we’re using a dynamic key
             extraVars: [
@@ -125,7 +125,7 @@ def onprem = [
         // Runs Ansible to install packages (e.g., Docker) on target environments
         ansiblePlaybook(
             playbook: "ansible/site.yml",
-            inventory: "ansible/hosts",
+            inventory: "ansible/inventory/",
             limit: "${env.HOST_SUBSET_ONPREM}",
             credentialsId: "${env.CREDENTIALS_ONPREM_SERVER}", 
             extraVars: [
@@ -142,7 +142,7 @@ def onprem = [
         // Runs Ansible to run docker-compose on target environments
         ansiblePlaybook(
             playbook: "ansible/site.yml",
-            inventory: "ansible/hosts",
+            inventory: "ansible/inventory/",
             limit: "${env.HOST_SUBSET_ONPREM}",
             credentialsId: "${env.CREDENTIALS_ONPREM_SERVER}", 
             extraVars: [
