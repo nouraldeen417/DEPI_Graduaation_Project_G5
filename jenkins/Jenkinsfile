@@ -77,7 +77,7 @@ def aws = [
                                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 sh """
                     terraform init  -upgrade 
-                    terraform apply -auto-approve -var='ssh_key_file=${env.AWS_SSH_KEY}' 
+                    terraform apply -auto-approve 
                 """ 
             }
         }

@@ -10,9 +10,9 @@ sudo chmod 440 /etc/sudoers.d/management
 # Set up SSH directory and copy authorized_keys from the default user
 sudo mkdir -p /home/management/.ssh
 sudo cp "/home/ubuntu/.ssh/authorized_keys" /home/management/.ssh/authorized_keys
-
+ssh-keyscan -H "$(hostname)" >> /home/management/.ssh/known_hosts
 # Set ownership and permissions
 sudo chown -R management:management /home/management/.ssh
 sudo chmod 700 /home/management/.ssh
-sudo chmod 600 /home/management/.ssh/authorized_keys
+sudo chmod 600 /home/management/.ssh/authorized_keys /home/management/.ssh/known_hosts
 sudo echo "done creating management user with passwordless sudo and SSH access"
