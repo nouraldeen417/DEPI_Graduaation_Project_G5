@@ -204,7 +204,7 @@ pipeline {
                     steps {
                         script {
                             if (params.DEPLOY_K8S) { k8s.buildInfra() }       // Not supported yet
-                            if (params.DEPLOY_AWS) { aws.prepare(); aws.buildInfra() }
+                            if (params.DEPLOY_AWS) {  aws.buildInfra() }
                             if (params.DEPLOY_ONPREM) { onprem.buildInfra() } // Not supported yet
                         }
                     }
