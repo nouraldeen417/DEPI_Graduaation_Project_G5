@@ -58,16 +58,6 @@ def k8s = [
 ]
 
 def aws = [
-    prepare: { 
-        echo "Prepare AWS infrastructure for building"
-        withCredentials([sshUserPrivateKey(credentialsId: "${env.CREDENTIALS_AWS_SSH}", keyFileVariable: 'SSH_KEY',usernameVariable: 'USERNAME')]) {
-            sh """
-                mkdir -p ${WORKSPACE}/.ssh
-                echo ${SSH_KEY} > .ssh/ssh_key.pem
-                chmod 400 .ssh/ssh_key.pem
-            """
-        }
-    },
     // Build AWS infrastructure using Terraform    
     buildInfra: {
         echo "Building AWS infrastructure"
@@ -288,7 +278,7 @@ pipeline {
     }
     post {
         always {
-                        sh 'rm -rf .ssh'
+                echo "Cleaning up workspace..."       
                 }
         success {
 
