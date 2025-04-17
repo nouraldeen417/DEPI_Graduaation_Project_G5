@@ -3,7 +3,7 @@ entries:
   NetworkApp:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2025-04-17T21:16:24.169651696+02:00"
+    created: "2025-04-17T21:34:40.360569748+02:00"
     dependencies:
     - condition: ingress-nginx.enabled
       name: ingress-nginx
@@ -16,4 +16,4 @@ entries:
     urls:
     - https://nouraldeen417.github.io/DEPI_Graduation_Project_G5/charts/NetworkApp-0.1.0.tgz
     version: 0.1.0
-generated: "2025-04-17T21:16:24.132533141+02:00"
+generated: "2025-04-17T21:34:40.336624133+02:00"
