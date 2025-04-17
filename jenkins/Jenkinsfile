@@ -46,8 +46,8 @@ def k8s = [
         sh """
             kubectl get nodes --kubeconfig=${KUBECONFIG}
             helm upgrade --install my-app ./docs/charts/*.tgz \
-            -set app.container.tag=${IMAGE_TAG} \
-            -set app.container.image=${DOCKER_REGISTRY}/${IMAGE_NAME} \
+            --set app.container.tag=${IMAGE_TAG} \
+            --set app.container.image=${DOCKER_REGISTRY}/${IMAGE_NAME} \
             --kubeconfig ${KUBECONFIG} \
             --atomic
         """
