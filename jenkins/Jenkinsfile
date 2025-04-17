@@ -43,16 +43,22 @@ def k8s = [
     },
     deploy: {
         echo "Deploying to Kubernetes"
-        dir('kubernates/') {
-            sh """
-                kubectl get nodes --kubeconfig=${KUBECONFIG}
-                echo ${KUBECONFIG}
-                export KUBECONFIG=${KUBECONFIG}
-                chmod +x ./manage.sh 
-                ./manage.sh delete 2>/dev/null || true 
-                ./manage.sh apply
-            """
-        }
+        sh """
+            kubectl get nodes --kubeconfig=${KUBECONFIG}
+            helm upgrade --install my-app ./docs/charts/*.tgz \
+            --kubeconfig ${KUBECONFIG} \
+            --atomic
+        """
+        // dir('kubernates/') {
+        //     sh """
+        //         // kubectl get nodes --kubeconfig=${KUBECONFIG}
+        //         // echo ${KUBECONFIG}
+        //         // export KUBECONFIG=${KUBECONFIG}
+        //         // chmod +x ./manage.sh 
+        //         // ./manage.sh delete 2>/dev/null || true 
+        //         // ./manage.sh apply
+        //     """
+        // }
 
     }
 ]
