@@ -189,7 +189,7 @@ pipeline {
                         // Verify
                         sh 'echo PIPELINE_ACTION is $PIPELINE_ACTION'
                         sh 'echo DEPLOY_K8S is $DEPLOY_K8S'
-                        sh 'echo CUSTOM_BUILD_NUMBER is $CUSTOM_BUILD_NUMBER'
+                        sh 'echo DEPLOY_AWS is $DEPLOY_AWS'
                 }
             }
         }
