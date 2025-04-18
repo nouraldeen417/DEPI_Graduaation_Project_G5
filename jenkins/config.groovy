@@ -1,5 +1,5 @@
 // repo/jenkins/JenkinsVarFile.groovy
-def config : [
+def config = [
     HOST_SUBSET_ONPREM : 'on_prems' , // Define the host subset in ansible inventory
     HOST_SUBSET_AWS : 'aws_ec2'  ,// Define the host subset in ansible inventory 
     CREDENTIALS_AWS_ACCOUNT : 'aws-credentials', // AWS credentials ID
