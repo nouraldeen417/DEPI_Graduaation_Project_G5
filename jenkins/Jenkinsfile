@@ -212,9 +212,9 @@ pipeline {
                 stage('Build Infrastructure') {
                     steps {
                         script {
-                            if (env.DEPLOY_K8S) { k8s.buildInfra() }       // Not supported yet
-                            if (env.DEPLOY_AWS) {  aws.buildInfra() }
-                            if (env.DEPLOY_ONPREM) { onprem.buildInfra() } // Not supported yet
+                            if (env.DEPLOY_K8S == 'true') { k8s.buildInfra() }       // Not supported yet
+                            if (env.DEPLOY_AWS == 'true') {  aws.buildInfra() }
+                            if (env.DEPLOY_ONPREM == 'true') { onprem.buildInfra() } // Not supported yet
                         }
                     }
                 }
@@ -252,7 +252,7 @@ pipeline {
             parallel {
                 // Kubernetes Deployment
                 stage('Deploy to K8s') {
-                    when { expression { env.DEPLOY_K8S } }
+                    when { expression { env.DEPLOY_K8S == 'true'} }
                     steps {
                         script {
                             k8s.prepare()
@@ -263,7 +263,7 @@ pipeline {
 
                 // AWS Deployment
                 stage('Deploy to AWS') {
-                    when { expression { env.DEPLOY_AWS } }
+                    when { expression { env.DEPLOY_AWS == 'true' } }
                     steps {
                         script {
                             aws.prepare_deployment()
@@ -274,7 +274,7 @@ pipeline {
 
                 // OnPrem Deployment
                 stage('Deploy to OnPrem') {
-                    when { expression { env.DEPLOY_ONPREM } }
+                    when { expression { env.DEPLOY_ONPREM == 'true' } }
                     steps {
                         script {
                             onprem.prepare_deployment()
