@@ -158,7 +158,7 @@ pipeline {
     agent any
     // Define parameters
     parameters {
-        string(name: 'PIPELINE_ACTION', defaultValue: 'build & deploy', description: 'Choose pipeline action')
+        choice(name: 'PIPELINE_ACTION', choices: ['build & deploy', 'build only', 'deploy only'], description: 'Choose pipeline action')
         string(name: 'CUSTOM_BUILD_NUMBER', defaultValue: "${BUILD_NUMBER}", description: 'Image tag (default: BUILD_NUMBER)')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
         // Checkbox-style environment selection
@@ -208,7 +208,7 @@ pipeline {
                     // Verify
                     sh 'echo PIPELINE_ACTION is $PIPELINE_ACTION'
                     sh 'echo DEPLOY_K8S is $DEPLOY_K8S'
-                    sh 'echo CREDENTIALS_AWS_ACCOUNT is $CREDENTIALS_AWS_ACCOUNT'
+                    sh 'echo CUSTOM_BUILD_NUMBER is $CUSTOM_BUILD_NUMBER'
                 }
             }
         }
