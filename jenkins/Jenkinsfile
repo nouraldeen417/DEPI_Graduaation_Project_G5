@@ -45,7 +45,7 @@ def k8s = [
         echo "Deploying to Kubernetes"
         sh """
             kubectl get nodes --kubeconfig=${KUBECONFIG}
-            helm upgrade --install my-app ./docs/charts/*.tgz \
+            helm upgrade --install my-app ./helm/charts/*.tgz \
             --set app.container.tag=${IMAGE_TAG} \
             --set app.container.image=${IMAGE_NAME} \
             --kubeconfig ${KUBECONFIG} \
