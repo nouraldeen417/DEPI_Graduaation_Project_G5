@@ -193,7 +193,7 @@ pipeline {
                 }
             }
         }
-        Stage 2: Parallel Build Phase
+//        Stage 2: Parallel Build Phase
         stage('Build Phase') {
             parallel {
                 // Parallel Image Building
