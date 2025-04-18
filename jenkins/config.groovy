@@ -16,7 +16,7 @@ def config = [
     REMOTE_DIR = "/home/jenkins-remote/"
     KUBECONFIG = "${WORKSPACE}/.kube/config"
     AWS_SSH_KEY = "${WORKSPACE}/.ssh/ssh_key.pem"
-    SLACK_CHANNEL = '#team-project' // Slack channel to send notifications
+    SLACK_CHANNEL = "#team-project" // Slack channel to send notifications
 
 ]
 return config
