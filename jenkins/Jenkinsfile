@@ -327,7 +327,7 @@ pipeline {
             steps {
                 script {
                     // Load the Groovy file from repo/jenkins/JenkinsVarFile.groovy
-                    def config = load 'jenkins/JenkinsVarFile.groovy'
+                    def config = load 'jenkins/config.groovy'
                     // Assign to environment variables for pipeline use
                     env.DB_HOST = config.DB_HOST
                     env.DB_PORT = config.DB_PORT
