@@ -168,166 +168,145 @@ pipeline {
         // Add more parameters as needed
    }    
 
-    // environment {
-    //     // HOST_SUBSET_ONPREM = 'on_prems'  // Define the host subset in ansible inventory
-    //     // HOST_SUBSET_AWS = 'aws_ec2'  // Define the host subset in ansible inventory 
-    //     // CREDENTIALS_AWS_ACCOUNT = 'aws-credentials' // AWS credentials ID
-    //     // CREDENTIALS_AWS_SSH = 'aws_ec2_ssh_key' // AWS credentials ID        
-    //     // CREDENTIALS_ONPREM_SERVER = 'jenkins-remote-credentials' // Jenkins remote credentials ID
-    //     // CREDENTIALS_KUBECONFIG = 'kubeconfig-secret' // Kubeconfig secret ID
-    //     // CREDENTIALS_DOCKERHUB = 'dockerhub' // Docker Hub credentials ID
-    //     // CREDENTIALS_SLACK = 'slack' // Slack credentials ID
-    //     // DOCKER_REGISTRY = 'your-docker-registry' // e.g., Docker Hub
-    //     // IMAGE_NAME = "nouraldeen152/networkapp"
-    //     // IMAGE_TAG =  "${params.CUSTOM_BUILD_NUMBER}" // Use custom build number or default to BUILD_NUMBER
-    //     // REMOTE_USER = 'jenkins-remote'
-    //     // REMOTE_HOST = '192.168.1.150'
-    //     // REMOTE_DIR = "/home/jenkins-remote/"
-    //     // KUBECONFIG = "${WORKSPACE}/.kube/config"
-    //     // AWS_SSH_KEY = "${WORKSPACE}/.ssh/ssh_key.pem"
-    //     // SLACK_CHANNEL = '#team-project' // Slack channel to send notifications
-    // }
     stages {
         // Stage 1: Setup (hardcoded)
         stage('Load Variables') {
             steps {
                 script {
-  def data = load 'jenkins/config.groovy'
-                    if (!(data instanceof Map) || !data.config || !data.flags) {
-                        error "config.groovy must return a Map with 'config' and 'flags' sections"
-                    }
-                    // Assign config section to env
-                    data.config.each { key, value ->
-                        env."${key}" = value?.toString()
-                    }
-                    // Assign flags, prioritize params or defaults
-                    def defaults = [PIPELINE_ACTION: 'build only', ENABLE_FEATURE: 'false']
-                    data.flags.each { key, value ->
-                        env."${key}" = params[key] ?: value?.toString() ?: defaults[key]
-                    }
-                    // Verify
-                    sh 'echo PIPELINE_ACTION is $PIPELINE_ACTION'
-                    sh 'echo DEPLOY_K8S is $DEPLOY_K8S'
-                    sh 'echo CUSTOM_BUILD_NUMBER is $CUSTOM_BUILD_NUMBER'
+                        def data = load 'jenkins/config.groovy'
+                        if (!(data instanceof Map) || !data.config || !data.flags) {
+                            error "config.groovy must return a Map with 'config' and 'flags' sections"
+                        }
+                        // Assign config section to env
+                        data.config.each { key, value ->
+                            env."${key}" = value?.toString()
+                        }
+                        // Assign flags, prioritize params or defaults
+                        def defaults = [PIPELINE_ACTION: 'build only', ENABLE_FEATURE: 'false']
+                        data.flags.each { key, value ->
+                            env."${key}" = params[key] ?: value?.toString() ?: defaults[key]
+                        }
+                        // Verify
+                        sh 'echo PIPELINE_ACTION is $PIPELINE_ACTION'
+                        sh 'echo DEPLOY_K8S is $DEPLOY_K8S'
+                        sh 'echo CUSTOM_BUILD_NUMBER is $CUSTOM_BUILD_NUMBER'
                 }
             }
         }
-        // Stage 2: Parallel Build Phase
-    //     stage('Build Phase') {
-    //         when {
-    //             expression { params.PIPELINE_ACTION in ['build only', 'build & deploy'] }
-    //         }
-    //         parallel {
-    //             // Parallel Image Building
-    //             stage('Build Images') {
-    //                 steps {
-    //                     script {
-    //                         // build Docker images
-    //                         images.build()
-    //                     }
-    //                 }
-    //             }
+        Stage 2: Parallel Build Phase
+        stage('Build Phase') {
+            parallel {
+                // Parallel Image Building
+                stage('Build Images') {
+                 when { expression { env.PIPELINE_ACTION in ['build only', 'build & deploy'] }}
+                    steps {
+                        script {
+                            // build Docker images
+                            images.build()
+                        }
+                    }
+                }
 
-    //             // Parallel Infrastructure Setup
-    //             stage('Build Infrastructure') {
-    //                 steps {
-    //                     script {
-    //                         if (params.DEPLOY_K8S) { k8s.buildInfra() }       // Not supported yet
-    //                         if (params.DEPLOY_AWS) {  aws.buildInfra() }
-    //                         if (params.DEPLOY_ONPREM) { onprem.buildInfra() } // Not supported yet
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     // Stage 3: Push Images
-    //     stage('Push Images') {
-    //         when {
-    //             expression { params.PIPELINE_ACTION in ['build only', 'build & deploy'] }
-    //         }
-    //         steps {
-    //             script {
-    //                 images.push()
-    //             }
-    //         }
-    //     }
-    //     // Stage 4: Testing
-    //     stage('Testing') {
-    //         when {
-    //             allOf {
-    //                 expression { !params.SKIP_TESTS }
-    //                 expression { params.PIPELINE_ACTION in ['build & deploy', 'deploy only'] }
-    //             }
-    //         }
-    //         steps {
-    //             echo 'Running test suite...'
-    //             // Add your test commands here
-    //         }
-    //     }
-    //     // Stage 5: Parallel Deploy Phase
-    //     stage('Deploy Phase') {
-    //         when {
-    //             expression { params.PIPELINE_ACTION in ['deploy only', 'build & deploy'] }
-    //         }
-    //         parallel {
-    //             // Kubernetes Deployment
-    //             stage('Deploy to K8s') {
-    //                 when { expression { params.DEPLOY_K8S } }
-    //                 steps {
-    //                     script {
-    //                         k8s.prepare()
-    //                         k8s.deploy()
-    //                     }
-    //                 }
-    //             }
+                // Parallel Infrastructure Setup
+                stage('Build Infrastructure') {
+                    steps {
+                        script {
+                            if (env.DEPLOY_K8S) { k8s.buildInfra() }       // Not supported yet
+                            if (env.DEPLOY_AWS) {  aws.buildInfra() }
+                            if (env.DEPLOY_ONPREM) { onprem.buildInfra() } // Not supported yet
+                        }
+                    }
+                }
+            }
+        }
+        // Stage 3: Push Images
+        stage('Push Images') {
+            when {
+                expression { env.PIPELINE_ACTION in ['build only', 'build & deploy'] }
+            }
+            steps {
+                script {
+                    images.push()
+                }
+            }
+        }
+        // Stage 4: Testing
+        stage('Testing') {
+            when {
+                allOf {
+                    expression { !env.SKIP_TESTS }
+                    expression { env.PIPELINE_ACTION in ['build & deploy', 'deploy only'] }
+                }
+            }
+            steps {
+                echo 'Running test suite...'
+                // Add your test commands here
+            }
+        }
+        // Stage 5: Parallel Deploy Phase
+        stage('Deploy Phase') {
+            when {
+                expression { env.PIPELINE_ACTION in ['deploy only', 'build & deploy'] }
+            }
+            parallel {
+                // Kubernetes Deployment
+                stage('Deploy to K8s') {
+                    when { expression { env.DEPLOY_K8S } }
+                    steps {
+                        script {
+                            k8s.prepare()
+                            k8s.deploy()
+                        }
+                    }
+                }
 
-    //             // AWS Deployment
-    //             stage('Deploy to AWS') {
-    //                 when { expression { params.DEPLOY_AWS } }
-    //                 steps {
-    //                     script {
-    //                         aws.prepare_deployment()
-    //                         aws.deploy()
-    //                     }
-    //                 }
-    //             }
+                // AWS Deployment
+                stage('Deploy to AWS') {
+                    when { expression { env.DEPLOY_AWS } }
+                    steps {
+                        script {
+                            aws.prepare_deployment()
+                            aws.deploy()
+                        }
+                    }
+                }
 
-    //             // OnPrem Deployment
-    //             stage('Deploy to OnPrem') {
-    //                 when { expression { params.DEPLOY_ONPREM } }
-    //                 steps {
-    //                     script {
-    //                         onprem.prepare_deployment()
-    //                         onprem.deploy()
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // post {
-    //     always {
-    //             echo "Cleaning up workspace..."       
-    //             }
-    //     success {
+                // OnPrem Deployment
+                stage('Deploy to OnPrem') {
+                    when { expression { env.DEPLOY_ONPREM } }
+                    steps {
+                        script {
+                            onprem.prepare_deployment()
+                            onprem.deploy()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+                echo "Cleaning up workspace..."       
+                }
+        success {
 
-    //         slackSend(
-    //             channel: env.SLACK_CHANNEL,
-    //             message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-    //         )
-    //     }
-    //     failure {
-    //         slackSend(
-    //             channel: env.SLACK_CHANNEL,
-    //             message: "❌ Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-    //         )
-    //     }
-    //     unstable {
-    //         slackSend(
-    //             channel: env.SLACK_CHANNEL,
-    //             message: "⚠️ Pipeline UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-    //         )
-    //     }
+            slackSend(
+                channel: env.SLACK_CHANNEL,
+                message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+            )
+        }
+        failure {
+            slackSend(
+                channel: env.SLACK_CHANNEL,
+                message: "❌ Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+            )
+        }
+        unstable {
+            slackSend(
+                channel: env.SLACK_CHANNEL,
+                message: "⚠️ Pipeline UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+            )
+        }
     }        
 
 }
