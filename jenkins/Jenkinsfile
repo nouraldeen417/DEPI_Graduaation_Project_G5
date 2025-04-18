@@ -203,7 +203,7 @@ pipeline {
                     // Use the variables
                     sh 'echo HOST_SUBSET_ONPREM is $HOST_SUBSET_ONPREM'
                     sh 'echo IMAGE_NAME is $IMAGE_NAME'
-                    sh 'echo IMAGE_TAG is $IMAGE_TAG'
+
                 }
             }
         }
