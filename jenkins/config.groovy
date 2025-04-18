@@ -10,7 +10,7 @@ def Configration_variables = [
     CREDENTIALS_SLACK : 'slack' ,// Slack credentials ID
     DOCKER_REGISTRY : 'your-docker-registry', // e.g., Docker Hub
     IMAGE_NAME : "nouraldeen152/networkapp",
-    IMAGE_TAG :  "${params.CUSTOM_BUILD_NUMBER}" ,// Use custom build number or default to BUILD_NUMBER
+    // IMAGE_TAG :  "${params.CUSTOM_BUILD_NUMBER}" ,// Use custom build number or default to BUILD_NUMBER
     REMOTE_USER : 'jenkins-remote',
     REMOTE_HOST : '192.168.1.150',
     REMOTE_DIR : "/home/jenkins-remote/",
@@ -21,7 +21,7 @@ def Configration_variables = [
 ]
 def Pipeline_Flags = [
     PIPELINE_ACTION: 'deploy only', // Empty to fall back to params or default  ['build & deploy', 'build only', 'deploy only']
-    CUSTOM_BUILD_NUMBER: '0',    // Use custom build number
+    IMAGE_TAG: '0',    // Use custom build number
     SKIP_TESTS: false, // Skip tests if true
     DEPLOY_K8S: true, // Deploy to Kubernetes if true
     DEPLOY_AWS: false, // Deploy to AWS if true
