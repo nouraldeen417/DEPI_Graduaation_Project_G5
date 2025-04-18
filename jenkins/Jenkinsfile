@@ -179,12 +179,12 @@ pipeline {
                         }
                         // Assign config section to env
                         data.config.each { key, value ->
-                            env."${key}" = value?.toString()
+                            env."${key}" = value
                         }
                         // Assign flags, prioritize params or defaults
                         def defaults = [PIPELINE_ACTION: 'build only', ENABLE_FEATURE: 'false']
                         data.flags.each { key, value ->
-                            env."${key}" = params[key] ?: value?.toString() ?: defaults[key]
+                            env."${key}" = params[key] ?: value ?: defaults[key]
                         }
                         // Verify
                         sh 'echo PIPELINE_ACTION is $PIPELINE_ACTION'
