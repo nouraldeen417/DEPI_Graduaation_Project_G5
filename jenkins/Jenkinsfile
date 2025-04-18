@@ -195,9 +195,11 @@ pipeline {
                     // Load the Groovy file from repo/jenkins/JenkinsVarFile.groovy
                     def config = load 'jenkins/config.groovy'
                     // Assign to environment variables for pipeline use
-                    config.each { key, value ->
-                        env[key] = value?.toString()
-                    }
+                    // config.each { key, value ->
+                    //     env[key] = value?.toString()
+                    // }
+                    env.HOST_SUBSET_ONPREM = config.HOST_SUBSET_ONPREM
+                    env.IMAGE_NAME = config.IMAGE_NAME
                     // Use the variables
                     sh 'echo HOST_SUBSET_ONPREM is $HOST_SUBSET_ONPREM'
                     sh 'echo IMAGE_NAME is $IMAGE_NAME'
