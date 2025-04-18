@@ -196,7 +196,7 @@ pipeline {
                     def config = load 'jenkins/config.groovy'
                     // Assign to environment variables for pipeline use
                     config.each { key, value ->
-                        env[key] = value
+                        env[key] = value?.toString()
                     }
                     // Use the variables
                     sh 'echo HOST_SUBSET_ONPREM is $HOST_SUBSET_ONPREM'
