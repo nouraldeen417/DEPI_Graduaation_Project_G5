@@ -1,5 +1,5 @@
 // repo/jenkins/JenkinsVarFile.groovy
-def config = [
+def Configration_variables = [
     HOST_SUBSET_ONPREM : 'on_prems' , // Define the host subset in ansible inventory
     HOST_SUBSET_AWS : 'aws_ec2'  ,// Define the host subset in ansible inventory 
     CREDENTIALS_AWS_ACCOUNT : 'aws-credentials', // AWS credentials ID
@@ -19,4 +19,16 @@ def config = [
     SLACK_CHANNEL : "#team-project" // Slack channel to send notifications
 
 ]
-return config
+def Pipeline_Flags = [
+    PIPELINE_ACTION: 'deploy only', // Empty to fall back to params or default  ['build & deploy', 'build only', 'deploy only']
+    CUSTOM_BUILD_NUMBER: '0',    // Use custom build number
+    SKIP_TESTS: false, // Skip tests if true
+    DEPLOY_K8S: true, // Deploy to Kubernetes if true
+    DEPLOY_AWS: false, // Deploy to AWS if true
+    DEPLOY_ONPREM: false, // Deploy to on-premises if true
+]
+
+return [
+    config: Configration_variables ,
+    flags: Pipeline_Flags
+]
