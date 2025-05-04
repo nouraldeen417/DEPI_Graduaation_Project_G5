@@ -15,5 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && python djangoapp/manage.py collectstatic --noinput  
 
 EXPOSE 8000
+# Change the working directory to the Django app subdirectory
+WORKDIR /app/djangoapp
 # Run Gunicorn directly in the Docker image
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "storefront.wsgi:application"]
