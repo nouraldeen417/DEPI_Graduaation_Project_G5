@@ -28,6 +28,7 @@ def Pipeline_Flags = [
     DEPLOY_ONPREM: true, // Deploy to on-premises if true
 ]
 
+
 return [
     config: Configration_variables ,
     flags: Pipeline_Flags
