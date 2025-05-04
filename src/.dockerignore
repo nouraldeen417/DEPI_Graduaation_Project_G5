@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Environment files
+.env
+venv/
+env/
+
+# Git & IDE files
+.git
+.idea
+.vscode
+
+# Logs & temp files
+*.log
+*.tmp

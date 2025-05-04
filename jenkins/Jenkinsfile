@@ -3,12 +3,18 @@ def images = [
         echo "Preparing image build environment for ${env.IMAGE_NAME}:${env.IMAGE_TAG}"
     },
     build: {
-        sh """
-            docker build -t ${env.IMAGE_NAME}:${IMAGE_TAG}  .
-            cd nginx
+        dir('src/') {
+            sh """
+                docker build -t ${env.IMAGE_NAME}:${IMAGE_TAG}  .
+            """
+        }
+        dir('nginx/') {
+            sh """
             docker build -t nouraldeen152/nginx_reverse_proxy:${IMAGE_TAG}  .
-        """
-    },
+          """
+        }
+
+        },
     push: {
         echo 'push images in my public regitry '
         withCredentials([usernamePassword(credentialsId: "${env.CREDENTIALS_DOCKERHUB}", passwordVariable: 'PASS', usernameVariable: 'USER')]) {
