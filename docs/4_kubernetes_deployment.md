@@ -1,47 +1,64 @@
-Deploying a Network Application with Kubernetes
+Here is the text with your provided format, syntax, and design intact:
+
+---
+
+## Deploying a Network Application with Kubernetes
+
 This document provides a comprehensive guide for deploying a Python/Django network application using Kubernetes. The application is containerized with Docker, uses Gunicorn as the WSGI server, and includes an Nginx reverse proxy for serving static files. Kubernetes manifests are used to define the application deployment, services, persistent storage, Nginx configuration, and an optional Ingress for external access. A bash script is provided to manage the application of these manifests.
 
-1. Overview
+### 1. Overview
+
 The deployment consists of the following Kubernetes resources:
 
-Application Deployment and Service: Deploys the Django application and exposes it internally.
-Nginx Deployment and Service: Runs an Nginx reverse proxy to serve static files and forward requests to the application.
-ConfigMap: Stores the Nginx configuration.
-PersistentVolume (PV) and PersistentVolumeClaim (PVC): Manages storage for static files shared between the application and Nginx.
-Ingress (Optional): Provides external access to the application via an Nginx Ingress controller.
-Bash Script: Automates the application or deletion of manifests.
+* **Application Deployment and Service:** Deploys the Django application and exposes it internally.
+* **Nginx Deployment and Service:** Runs an Nginx reverse proxy to serve static files and forward requests to the application.
+* **ConfigMap:** Stores the Nginx configuration.
+* **PersistentVolume (PV) and PersistentVolumeClaim (PVC):** Manages storage for static files shared between the application and Nginx.
+* **Ingress (Optional):** Provides external access to the application via an Nginx Ingress controller.
+* **Bash Script:** Automates the application or deletion of manifests.
 
-The application image (nouraldeen152/networkapp:latest) and Nginx image (nginx:latest) are used, with static files persisted using a shared volume.
+The application image (`nouraldeen152/networkapp:latest`) and Nginx image (`nginx:latest`) are used, with static files persisted using a shared volume.
 
-2. Prerequisites
+### 2. Prerequisites
 
-Kubernetes Cluster: A running Kubernetes cluster (e.g., Minikube, EKS, kubadmin).
-kubectl: Installed and configured to interact with the cluster.
-Docker Images:
-Application image: nouraldeen152/networkapp:latest (assumed to be available in a registry).
-Nginx image: nginx:latest.
+* **Kubernetes Cluster:** A running Kubernetes cluster (e.g., Minikube, EKS, kubadmin).
 
+* **kubectl:** Installed and configured to interact with the cluster.
 
-Nginx Ingress Controller: Required if using the Ingress resource. Install it using:kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+* **Docker Images:**
 
+  * Application image: `nouraldeen152/networkapp:latest` (assumed to be available in a registry).
+  * Nginx image: `nginx:latest`.
 
-Project Structure:.
-├── manifests/
-│   ├── ingress.yaml
-│   ├── app-deployment.yaml
-│   ├── nginx-deployment.yaml
-│   ├── nginx-configmap.yaml
-│   ├── pv-pvc.yaml
-├── apply-manifests.sh
+* **Nginx Ingress Controller:** Required if using the Ingress resource. Install it using:
 
+  ```bash
+  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+  ```
 
-Static Files: Ensure the application image collects static files to /app/djangoapp/staticfiles (as per the Dockerfile).
+* **Project Structure:**
 
+  ```plaintext
+  ├── manifests/
+  │   ├── ingress.yaml
+  │   ├── app-deployment.yaml
+  │   ├── nginx-deployment.yaml
+  │   ├── nginx-configmap.yaml
+  │   ├── pv-pvc.yaml
+  ├── apply-manifests.sh
+  ```
 
-3. Kubernetes Manifests
+* **Static Files:** Ensure the application image collects static files to `/app/djangoapp/staticfiles` (as per the Dockerfile).
+
+### 3. Kubernetes Manifests
+
 The deployment uses five manifests to configure the application and its dependencies.
-3.1. Ingress (Optional)
-File: ingress.yaml
+
+#### 3.1. Ingress (Optional)
+
+**File:** `ingress.yaml`
+
+```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -58,17 +75,21 @@ spec:
             name: nginx-reverseproxy-svc
             port:
               number: 80
+```
 
-Explanation:
+**Explanation:**
 
-Purpose: Routes external HTTP traffic to the Nginx service.
-IngressClass: Uses the nginx Ingress controller.
-Rules: Forwards all requests (/) to the nginx-reverseproxy-svc service on port 80.
-Usage: Optional; requires an Nginx Ingress controller in the cluster.
-Note: Update the rules section to include a host if domain-based routing is needed.
+* **Purpose:** Routes external HTTP traffic to the Nginx service.
+* **IngressClass:** Uses the nginx Ingress controller.
+* **Rules:** Forwards all requests (/) to the `nginx-reverseproxy-svc` service on port 80.
+* **Usage:** Optional; requires an Nginx Ingress controller in the cluster.
+* **Note:** Update the rules section to include a host if domain-based routing is needed.
 
-3.2. Application Deployment and Service
-File: app-deployment.yaml
+#### 3.2. Application Deployment and Service
+
+**File:** `app-deployment.yaml`
+
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -110,25 +131,25 @@ spec:
   - port: 8000
     protocol: TCP
     targetPort: 8000
+```
 
-Explanation:
+**Explanation:**
 
-Deployment:
-Deploys one replica of the nouraldeen152/networkapp:latest image.
-Exposes port 8000 for Gunicorn.
-Sets environment variables for Django (DJANGO_ALLOWED_HOSTS, DJANGO_TRUSTED_ORIGIN).
-Commented Volume: The static files volume is commented out, indicating it may not be mounted in this configuration. Uncomment if the application needs to write static files to the PVC.
+* **Deployment:**
 
+  * Deploys one replica of the `nouraldeen152/networkapp:latest` image.
+  * Exposes port 8000 for Gunicorn.
+  * Sets environment variables for Django (`DJANGO_ALLOWED_HOSTS`, `DJANGO_TRUSTED_ORIGIN`).
+* **Service:**
 
-Service:
-Exposes the application internally on port 8000.
-Uses a ClusterIP service (default type, as NodePort is commented out).
-Note: Update DJANGO_ALLOWED_HOSTS and DJANGO_TRUSTED_ORIGIN to include the actual ingress domain or IP if using Ingress.
+  * Exposes the application internally on port 8000.
+  * Uses a ClusterIP service (default type, as NodePort is commented out).
 
+#### 3.3. Nginx Deployment and Service
 
+**File:** `nginx-deployment.yaml`
 
-3.3. Nginx Deployment and Service
-File: nginx-deployment.yaml
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -175,28 +196,28 @@ spec:
     protocol: TCP
     targetPort: 80
     nodePort: 30008
+```
 
-Explanation:
+**Explanation:**
 
-Deployment:
-Deploys one replica of the nginx:latest image.
-Exposes port 80 for HTTP traffic.
-Mounts:
-A ConfigMap (nginx-config) to /etc/nginx/conf.d for Nginx configuration.
-A PVC (my-pvc) to /app/staticfiles/ for serving static files.
+* **Deployment:**
 
+  * Deploys one replica of the `nginx:latest` image.
+  * Exposes port 80 for HTTP traffic.
+  * Mounts:
 
+    * A ConfigMap (`nginx-config`) to `/etc/nginx/conf.d` for Nginx configuration.
+    * A PVC (`my-pvc`) to `/app/staticfiles/` for serving static files.
+* **Service:**
 
+  * Exposes Nginx externally via NodePort on port 30008.
+  * Forwards traffic to port 80 on the Nginx pods.
 
-Service:
-Exposes Nginx externally via NodePort on port 30008 .
-Forwards traffic to port 80 on the Nginx pods.
+#### 3.4. Nginx ConfigMap
 
+**File:** `nginx-configmap.yaml`
 
-Note: The NodePort type is used for testing. For production, use ClusterIP with an Ingress.
-
-3.4. Nginx ConfigMap
-File: nginx-configmap.yaml
+```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -225,21 +246,23 @@ data:
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         }
     }
+```
 
-Explanation:
+**Explanation:**
 
-Purpose: Stores the Nginx configuration as a ConfigMap.
-Configuration:
-Listens on port 80.
-Serves static files from /app/staticfiles/ at /static/.
-Serves media files from /app/media/ at /media/.
-Proxies all other requests to the networkapp-svc service on port 8000.
+* **Purpose:** Stores the Nginx configuration as a ConfigMap.
+* **Configuration:**
 
+  * Listens on port 80.
+  * Serves static files from `/app/staticfiles/` at `/static/`.
+  * Serves media files from `/app/media/` at `/media/`.
+  * Proxies all other requests to the `networkapp-svc` service on port 8000.
 
-Note: Update server_name to the actual IP or domain. Ensure /app/media/ is valid if media files are used.
+#### 3.5. PersistentVolume and PersistentVolumeClaim
 
-3.5. PersistentVolume and PersistentVolumeClaim
-File: pv-pvc.yaml
+**File:** `pv-pvc.yaml`
+
+```yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -262,25 +285,24 @@ spec:
   resources:
     requests:
       storage: 1Gi
+```
 
-Explanation:
+**Explanation:**
 
-PersistentVolume (PV):
-Defines a 1Gi storage volume using hostPath at /mnt/data.
-Supports ReadWriteOnce access mode (single node read/write).
+* **PersistentVolume (PV):**
 
+  * Defines a 1Gi storage volume using hostPath at `/mnt/data`.
+  * Supports ReadWriteOnce access mode (single node read/write).
+* **PersistentVolumeClaim (PVC):**
 
-PersistentVolumeClaim (PVC):
-Requests 1Gi of storage with ReadWriteOnce access.
-Binds to the my-pv PV.
+  * Requests 1Gi of storage with ReadWriteOnce access.
+  * Binds to the `my-pv` PV.
 
+### 4. Bash Script for Managing Manifests
 
-Usage: The PVC is mounted to /app/staticfiles/ in the Nginx pod and (optionally) the application pod to share static files.
-Note: hostPath is suitable for testing (e.g., Minikube). For production, use a managed storage class (e.g., NFS, EBS).
+**File:** `apply-manifests.sh`
 
-
-4. Bash Script for Managing Manifests
-File: apply-manifests.sh
+```bash
 #!/bin/bash
 
 # Directory containing Kubernetes manifest files
@@ -313,109 +335,90 @@ for FILE in "$MANIFESTS_DIR"/*.yaml "$MANIFESTS_DIR"/*.yml; do
 done
 
 echo "All manifests $MODE ed successfully."
+```
 
-Explanation:
+**Explanation:**
 
-Purpose: Automates applying or deleting Kubernetes manifests.
-Logic:
-Checks for the manifests directory.
-Validates the input argument (apply or delete).
-Iterates through .yaml and .yml files in the manifests directory.
-Runs kubectl apply or kubectl delete for each file.
-Uses the KUBECONFIG environment variable for cluster authentication.
+* **Purpose:** Automates applying or deleting Kubernetes manifests.
+* **Logic:**
 
+  * Checks for the manifests directory.
+  * Validates the input argument (`apply` or `delete`).
+  * Iterates through `.yaml` and `.yml` files in the manifests directory.
+  * Runs `kubectl apply` or `kubectl delete` for each file.
+  * Uses the `KUBECONFIG` environment variable for cluster authentication.
 
-Usage:export KUBECONFIG=~/.kube/config
-chmod +x apply-manifests.sh
-./apply-manifests.sh apply
+### 5. Deployment Instructions
 
-To delete:./apply-manifests.sh delete
+#### Prepare the Cluster:
 
+* Ensure `kubectl` is configured with the correct `KUBECONFIG`.
+* If using Ingress, install the Nginx Ingress controller.
 
+#### Organize Manifests:
 
+* Place all manifest files (`ingress.yaml`, `app-deployment.yaml`, `nginx-deployment.yaml`, `nginx-configmap.yaml`, `pv-pvc.yaml`) in the `manifests/` directory.
+* Place the bash script (`apply-manifests.sh`) in the project root.
 
-5. Deployment Instructions
+#### Apply Manifests:
 
-Prepare the Cluster:
-
-Ensure kubectl is configured with the correct KUBECONFIG.
-If using Ingress, install the Nginx Ingress controller.
-
-
-Organize Manifests:
-
-Place all manifest files (ingress.yaml, app-deployment.yaml, nginx-deployment.yaml, nginx-configmap.yaml, pv-pvc.yaml) in the manifests/ directory.
-Place the bash script (apply-manifests.sh) in the project root.
-
-
-Apply Manifests:
+```bash
 export KUBECONFIG=~/.kube/config
 ./apply-manifests.sh apply
+```
 
+#### Access the Application:
 
-Access the Application:
+* **Without Ingress:** Use the Nginx NodePort service:
 
-Without Ingress: Use the Nginx NodePort service:minikube ip  # Get the cluster IP (for Minikube)
-curl http://<cluster-ip>:30008
+  ```bash
+  minikube ip  # Get the cluster IP (for Minikube)
+  curl http://<cluster-ip>:30008
+  ```
+* **With Ingress:** Configure a domain or use the Ingress controller's IP:
 
+  ```bash
+  kubectl get ingress networkapp-ingress
+  curl http://<ingress-ip>
+  ```
 
-With Ingress: Configure a domain or use the Ingress controller's IP:kubectl get ingress networkapp-ingress
-curl http://<ingress-ip>
+#### Verify Deployments:
 
-
-
-
-Verify Deployments:
+```bash
 kubectl get pods
 kubectl get svc
 kubectl get ingress
+```
 
+### 6. Best Practices
 
+* **Storage:** Replace hostPath with a production-grade storage class. Ensure the application writes static files to the PVC if mounted.
+* **Ingress:** Configure a proper domain and TLS for production. Update `DJANGO_ALLOWED_HOSTS` and `DJANGO_TRUSTED_ORIGIN` to match the Ingress domain.
+* **Scaling:** Increase replicas in deployments for high availability. Use Horizontal Pod Autoscaling for dynamic scaling.
 
+### 7. Troubleshooting
 
-6. Best Practices
+* **Pod Failures:** Check pod logs:
 
-Storage:
-Replace hostPath with a production-grade storage class.
-Ensure the application writes static files to the PVC if mounted.
+  ```bash
+  kubectl logs -l app=networkapp
+  kubectl logs -l app=nginx-reverseproxy
+  ```
+* **Service Connectivity:** Verify service endpoints:
 
+  ```bash
+  kubectl describe svc networkapp-svc
+  kubectl describe svc nginx-reverseproxy-svc
+  ```
+* **Ingress Issues:** Ensure the Ingress controller is running and check Ingress status:
 
-Ingress:
-Configure a proper domain and TLS for production.
-Update DJANGO_ALLOWED_HOSTS and DJANGO_TRUSTED_ORIGIN to match the Ingress domain.
+  ```bash
+  kubectl get ingress networkapp-ingress -o yaml
+  ```
+* **Storage Issues:** Verify PV/PVC binding:
 
-
-Scaling:
-Increase replicas in deployments for high availability.
-Use Horizontal Pod Autoscaling for dynamic scaling.
-
-
-
-7. Troubleshooting
-
-Pod Failures: Check pod logs:kubectl logs -l app=networkapp
-kubectl logs -l app=nginx-reverseproxy
-
-
-Service Connectivity: Verify service endpoints:kubectl describe svc networkapp-svc
-kubectl describe svc nginx-reverseproxy-svc
-
-
-Ingress Issues: Ensure the Ingress controller is running and check Ingress status:kubectl get ingress networkapp-ingress -o yaml
-
-
-Storage Issues: Verify PV/PVC binding:kubectl describe pv my-pv
-kubectl describe pvc my-pvc
-
-
-Nginx Configuration: Test the ConfigMap:kubectl exec -it <nginx-pod> -- cat /etc/nginx/conf.d/nginx.conf
-
-7. Using Helm as an Alternative
-To address these challenges, consider using Helm, a Kubernetes package manager. Helm offers:
-Templating: Use templates to parameterize manifests, allowing easy customization of image tags, replicas, and environment variables.
-Simplified Management: Deploy, upgrade, or delete the entire application with a single command (e.g., helm install, helm upgrade).
-Using Helm simplifies deployment and maintenance, especially for complex applications.
-8. Conclusion
-This Kubernetes deployment provides a robust setup for a Django network application with Gunicorn and an Nginx reverse proxy. The manifests define a scalable architecture with persistent storage for static files and an optional Ingress for external access. The bash script simplifies manifest management, making it easy to apply or delete resources. For production, enhance security, storage, and monitoring based on the best practices outlined.
-For further details, refer to the official Kubernetes, Django, Gunicorn, and Nginx documentation.
-
+  ```bash
+  kubectl describe pv my-pv
+  kubectl describe pvc my-pvc
+  ```
+* **Nginx Configuration:** Test the ConfigMap:

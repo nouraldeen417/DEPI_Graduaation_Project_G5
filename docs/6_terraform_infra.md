@@ -1,72 +1,82 @@
-Terraform-Based Infrastructure Provisioning for a Network Application
-This document outlines the process of using Terraform to provision the infrastructure for a Python/Django network application on AWS. The setup includes modules for compute (EC2 instances), network (VPC and subnets), and security (security groups), with an S3 backend for state management. The Terraform configuration generates an Ansible inventory file for integration with the Ansible deployment .
+# Terraform-Based Infrastructure Provisioning for a Network Application
 
-1. Overview
+This document outlines the process of using Terraform to provision the infrastructure for a Python/Django network application on AWS. The setup includes modules for compute (EC2 instances), network (VPC and subnets), and security (security groups), with an S3 backend for state management. The Terraform configuration generates an Ansible inventory file for integration with the Ansible deployment described previously. A user data script creates a `management` user during EC2 instance launch. A diagram illustrates the Terraform design, showing AWS resources and their relationships. .
+
+---
+
+## 1. Overview
+
 The Terraform configuration provisions:
-
-Network: A VPC with public and private subnets, an internet gateway, NAT gateway, and route tables.
-Security: A security group allowing SSH (port 22) and HTTP (port 80) ingress, with open egress.
-Compute: An EC2 instance in a public subnet to host the application.
-Ansible Integration: Generates an AWS inventory file for Ansible to deploy the application using Docker Compose.
+1. **Network**: A VPC with public and private subnets, an internet gateway, NAT gateway, and route tables.
+2. **Security**: A security group allowing SSH (port 22) and HTTP (port 80) ingress, with open egress.
+3. **Compute**: An EC2 instance in a public subnet to host the application, with a user data script to create a `management` user.
+4. **Ansible Integration**: Generates an AWS inventory file for Ansible to deploy the application using Docker Compose.
 
 The configuration uses:
+- **Modules**: Reusable modules for `network`, `security`, and `compute`.
+- **S3 Backend**: Stores Terraform state in an S3 bucket (`nour-tfstate`).
+- **Main File**: Orchestrates module calls and inventory generation.
+- **Provider**: Configures AWS (with commented LocalStack settings for testing).
+- **User Data**: A script to create a `management` user with passwordless sudo and SSH access.
+- **Diagram**: A visual representation of the Terraform design in Mermaid syntax.
 
-Modules: Reusable modules for network, security, and compute.
-S3 Backend: Stores Terraform state in an S3 bucket (nour-tfstate).
-Main File: Orchestrates module calls and inventory generation.
-Provider: Configures AWS (with commented LocalStack settings for testing).
+---
 
+## 2. Prerequisites
 
-2. Prerequisites
+- **Terraform**: Installed on the control machine (e.g., `brew install terraform` or download from HashiCorp).
+- **AWS Account**: Configured with valid credentials (`~/.aws/credentials`) or IAM role.
+- **AWS CLI**: Optional, for verifying resources (`aws configure`).
+- **S3 Bucket**: Created for Terraform state (`nour-tfstate` in `us-east-1`).
+- **Ansible Setup**: The Ansible project structure from the previous documentation, with the `inventory/` directory for `aws_inventory.yml`.
+- **Docker Images**:
+  - Application: `nouraldeen152/networkapp:20`.
+  - Nginx: `nouraldeen152/nginx-reverse-proxy:1.0`.
+  - Available in a registry (e.g., Docker Hub).
+- **SSH Key Pair**: An AWS key pair (`my-key`) for EC2 SSH access.
+- **Project Structure**:
+  ```
+  .
+  ├── modules/
+  │   ├── compute/
+  │   │   ├── main.tf
+  │   │   ├── outputs.tf
+  │   │   ├── variables.tf
+  │   ├── network/
+  │   │   ├── main.tf
+  │   │   ├── outputs.tf
+  │   │   ├── variables.tf
+  │   ├── security/
+  │   │   ├── main.tf
+  │   │   ├── outputs.tf
+  │   │   ├── variables.tf
+  ├── ansible/
+  │   ├── inventory/
+  │   │   ├── aws_inventory.yml
+  ├── user.sh
+  ├── main.tf
+  ```
+- **AMI**: The specified AMI (`ami-084568db4383264d4`) must be valid in `us-east-1`.
 
-Terraform: Installed on the control machine (e.g., brew install terraform or download from HashiCorp).
-AWS Account: Configured with valid credentials (~/.aws/credentials) or IAM role.
-AWS CLI: Optional, for verifying resources (aws configure).
-S3 Bucket: Created for Terraform state (nour-tfstate in us-east-1).
-Ansible Setup: The Ansible project structure from the ansible documentation, with the inventory/ directory for aws_inventory.yml.
-Docker Images:
-Application: nouraldeen152/networkapp:latest.
-Nginx: nouraldeen152/nginx-reverse-proxy:latest.
-Available in a registry (e.g., Docker Hub).
+---
 
+## 3. Terraform Configuration
 
-SSH Key Pair: An AWS key pair (my-key) for EC2 SSH access.
-Project Structure:.
-├── modules/
-│   ├── compute/
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   ├── variables.tf
-│   ├── network/
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   ├── variables.tf
-│   ├── security/
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   ├── variables.tf
-├── ansible/
-│   ├── inventory/
-│   │   ├── aws_inventory.yml
-├── user.sh
-├── main.tf
+### 3.1. Main Configuration
 
+**File**: `main.tf`
 
-AMI: The specified AMI (ami-084568db4383264d4) must be valid in us-east-1.
-
-
-3. Terraform Configuration
-3.1. Main Configuration
-File: main.tf
+```hcl
 provider "aws" {
   region = "us-east-1"
+
 }
 
 terraform {
   backend "s3" {
-    bucket = "nour-tfstate"
-    key    = "terraform.tfstate"
-    region = "us-east-1"
+    bucket = "xxxxxxx"
+    key    = "xxxxxxxx"
+    region = "xxxxxxx"
   }
 }
 
@@ -144,19 +154,51 @@ resource "local_file" "aws_inventory" {
     command = "rm -f ../ansible/inventory/aws_inventory.yml"
   }
 }
+```
 
-Explanation:
+**Explanation**:
+- **Provider**: Configures AWS in `us-east-1`. Commented LocalStack settings allow local testing.
+- **Backend**: Stores state in the `nour-tfstate` S3 bucket.
+- **Network Module**: Creates a VPC, subnets, gateways, and route tables.
+- **Security Module**: Defines a security group for SSH and HTTP access.
+- **Compute Module**: Provisions an EC2 instance with user data from `user.sh`.
+- **Local File**: Generates `aws_inventory.yml` for Ansible, cleaned up on `terraform destroy`.
 
-Provider: Configures AWS in us-east-1. Commented LocalStack settings allow local testing.
-Backend: Stores state in the nour-tfstate S3 bucket.
-Network Module: Creates a VPC, subnets, gateways, and route tables.
-Security Module: Defines a security group for SSH and HTTP access.
-Compute Module: Provisions an EC2 instance with user data for initialization.
-Local File: Generates aws_inventory.yml for Ansible, cleaned up on terraform destroy.
-Commented Resource: The null_resource for additional setup is commented out, indicating optional functionality.
+### 3.2. Network Module
 
-3.2. Network Module
-File: modules/network/main.tf
+**File**: `modules/network/main.tf`
+
+```hcl
+resource "aws_vpc" "main" {
+  cidr_block = var.vpc_cidr
+  tags = {
+    Name = var.vpc_name
+  }
+}
+
+resource "aws_subnet" "public" {
+  count                   = var.public_subnet_count
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "${var.vpc_name}-public-${count.index + 1}"
+  }
+}
+
+resource "aws_subnet" "private" {
+  count             = var.private_subnet_count
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, var.public_subnet_count + count.index)
+  availability_zone = var.availability_zones[count.index]
+  tags = {
+    Name = "${var.vpc_name}-private-${count.index + 1}"
+  }
+}
+
+resource "aws_internet_gateway" "main" {
+  vpc_id =പ
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr
   tags = {
@@ -235,8 +277,11 @@ resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
 }
+```
 
-Outputs: modules/network/outputs.tf
+**Outputs**: `modules/network/outputs.tf`
+
+```hcl
 output "vpc_id" {
   value = aws_vpc.main.id
 }
@@ -248,8 +293,11 @@ output "public_subnet_ids" {
 output "private_subnet_ids" {
   value = aws_subnet.private[*].id
 }
+```
 
-Variables: modules/network/variables.tf
+**Variables**: `modules/network/variables.tf`
+
+```hcl
 variable "vpc_name" {}
 variable "vpc_cidr" {}
 variable "vpc_reagion" {}
@@ -260,15 +308,18 @@ variable "ngw_tagname" {}
 variable "igw_tagname" {}
 variable "public_rtable_tagname" {}
 variable "private_rtable_tagname" {}
+```
 
-Explanation:
+**Explanation**:
+- Creates a VPC (`10.0.0.0/16`) with 2 public and 2 private subnets across `us-east-1a` and `us-east-1b`.
+- Provisions an internet gateway for public subnets and a NAT gateway for private subnets.
+- Configures route tables for public (to internet gateway) and private (to NAT gateway) subnets.
 
-Creates a VPC (10.0.0.0/16) with 2 public and 2 private subnets across us-east-1a and us-east-1b.
-Provisions an internet gateway for public subnets and a NAT gateway for private subnets.
-Configures route tables for public (to internet gateway) and private (to NAT gateway) subnets.
+### 3.3. Security Module
 
-3.3. Security Module
-File: modules/security/main.tf
+**File**: `modules/security/main.tf`
+
+```hcl
 resource "aws_security_group" "main" {
   vpc_id = var.vpc_id
   name   = var.sg_name
@@ -294,26 +345,35 @@ resource "aws_security_group" "main" {
     Name = var.sg_name
   }
 }
+```
 
-Outputs: modules/security/outputs.tf
+**Outputs**: `modules/security/outputs.tf`
+
+```hcl
 output "security_group_id" {
   value = aws_security_group.main.id
 }
+```
 
-Variables: modules/security/variables.tf
+**Variables**: `modules/security/variables.tf`
+
+```hcl
 variable "vpc_id" {}
 variable "sg_name" {}
 variable "ingress_rules" { type = list(any) }
 variable "egress_rules" { type = list(any) }
+```
 
-Explanation:
+**Explanation**:
+- Creates a security group allowing inbound SSH (port 22) and HTTP (port 80) from `0.0.0.0/0`.
+- Allows all outbound traffic (`protocol: -1`).
+- **Note**: Restrict `cidr_blocks` in production (e.g., to specific IPs).
 
-Creates a security group allowing inbound SSH (port 22) and HTTP (port 80) from 0.0.0.0/0.
-Allows all outbound traffic (protocol: -1).
-Note: Restrict cidr_blocks in production (e.g., to specific IPs).
+### 3.4. Compute Module
 
-3.4. Compute Module
-File: modules/compute/main.tf
+**File**: `modules/compute/main.tf`
+
+```hcl
 resource "aws_instance" "main" {
   for_each               = { for idx, instance in var.ec2_instance : idx => instance }
   ami                    = each.value.ami
@@ -327,8 +387,11 @@ resource "aws_instance" "main" {
     Name = each.value.name
   }
 }
+```
 
-Outputs: modules/compute/outputs.tf
+**Outputs**: `modules/compute/outputs.tf`
+
+```hcl
 output "instance_public_ip" {
   value = [for instance in aws_instance.main : instance.public_ip]
 }
@@ -336,8 +399,11 @@ output "instance_public_ip" {
 output "instance_ids" {
   value = [for instance in aws_instance.main : instance.id]
 }
+```
 
-Variables: modules/compute/variables.tf
+**Variables**: `modules/compute/variables.tf`
+
+```hcl
 variable "ec2_instance" {
   type = list(object({
     name               = string
@@ -350,82 +416,18 @@ variable "ec2_instance" {
     key_name           = string
   }))
 }
+```
 
-Explanation:
+**Explanation**:
+- Provisions a `t2.micro` EC2 instance in a public subnet.
+- Uses the specified AMI and attaches the security group.
+- Applies user data from `user.sh` and assigns the `my-key` key pair.
 
-Provisions a t2.micro EC2 instance in a public subnet.
-Uses the specified AMI and attaches the security group.
-Applies user data from user.sh and assigns the my-key key pair.
+### 3.5. User Data Script for Management User Creation
 
-3.5. User Data Script
-File: user.sh
-#!/bin/bash
-# Example user data script (customize as needed)
-apt-get update
-apt-get install -y docker.io
-systemctl enable docker
-systemctl start docker
-usermod -aG docker ubuntu
+**File**: `user.sh`
 
-Explanation:
-
-Installs Docker and adds the ubuntu user to the docker group.
-Note: This script is minimal; the Ansible playbook provides more comprehensive setup.
-
-
-4. Deployment Instructions
-
-Prepare the Environment:
-
-Install Terraform: brew install terraform.
-Configure AWS credentials: aws configure or set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
-Create the S3 bucket nour-tfstate in us-east-1:aws s3 mb s3://nour-tfstate --region us-east-1
-
-
-
-
-Set Up the Project:
-
-Create the directory structure and place files as described.
-Ensure the SSH key pair (my-key) exists in AWS us-east-1.
-Verify the AMI (ami-084568db4383264d4) is valid.
-
-
-Apply Terraform Configuration:
-terraform init
-terraform plan
-terraform apply -auto-approve
-
-
-Verify Resources:
-
-Check EC2 instance:aws ec2 describe-instances --region us-east-1
-
-
-Verify the Ansible inventory:cat ../ansible/inventory/aws_inventory.yml
-
-
-
-
-Run Ansible Playbook:
-cd ../ansible
-ansible-playbook -i inventory/aws_inventory.yml site.yml -e "selected_roles=['docker_install','docker_compose'] IMAGE_TAG=20"
-
-
-Access the Application:
-curl http://<ec2-public-ip>:80  # Via Nginx
-curl http://<ec2-public-ip>:8000  # Direct to Gunicorn
-
-
-Clean Up:
-terraform destroy -auto-approve
-
-
-
-4. User Data Script for Management User Creation
-
-File: user.sh
-
+```bash
 #!/bin/bash
 
 # Create the management user with home directory and Bash shell
@@ -444,76 +446,156 @@ sudo chown -R management:management /home/management/.ssh
 sudo chmod 700 /home/management/.ssh
 sudo chmod 600 /home/management/.ssh/authorized_keys
 sudo echo "done creating management user with passwordless sudo and SSH access"
+```
 
-Usage in Terraform:
+**Usage in Terraform**:
+- The script is referenced in the `compute` module via `user_data = file("${path.module}/user.sh")`.
+- It is executed automatically during EC2 instance launch to configure the `management` user.
 
-The script is referenced in the compute module via user_data = file("${path.module}/user.sh").
-It is executed automatically during EC2 instance launch to configure the management user.
+**Explanation**:
+- **User Creation**: Creates a `management` user with a home directory (`/home/management`) and Bash shell.
+- **Sudo Privileges**: Grants passwordless sudo access by adding a file to `/etc/sudoers.d/`.
+- **SSH Access**: Copies the SSH `authorized_keys` from the default `ubuntu` user (assumed for the AMI) to the `management` user's `.ssh` directory, enabling key-based SSH access.
+- **Permissions**: Sets secure ownership and permissions for the `.ssh` directory and `authorized_keys` file.
+- **Integration with Ansible**: The `management` user is used in the Ansible inventory (`ansible_user=management`) for deploying the application, ensuring consistency with SSH access.
+- **Assumptions**:
+  - The AMI uses `ubuntu` as the default user with an existing `.ssh/authorized_keys` file.
+  - The AWS key pair (`my-key`) is associated with the instance, populating `authorized_keys`.
+- **Customization**:
+  - Modify the default user (`ubuntu`) if the AMI uses a different user (e.g., `ec2-user` for Amazon Linux).
+  - Add error handling (e.g., check if `authorized_keys` exists) for robustness.
+- **Security Note**: Passwordless sudo is convenient for automation but risky in production. Consider limiting sudo privileges or requiring a password.
 
-Explanation:
+---
 
-User Creation: Creates a management user with a home directory (/home/management) and Bash shell.
+## 4. Terraform Design Diagram
 
-Sudo Privileges: Grants passwordless sudo access by adding a file to /etc/sudoers.d/.
-
-SSH Access: Copies the SSH authorized_keys from the default ubuntu user (assumed for the AMI) to the management user's .ssh directory, enabling key-based SSH access.
-Permissions: Sets secure ownership and permissions for the .ssh directory and authorized_keys file.
-Integration with Ansible: The management user is used in the Ansible inventory (ansible_user=management) for deploying the application, ensuring consistency with SSH access.
-
-5. Best Practices
-
-Security:
-Restrict security group ingress to specific IPs (e.g., your IP for SSH).
-Use AWS Secrets Manager or Parameter Store for credentials.
-Enable VPC flow logs for monitoring.
-
-
-State Management:
-Enable versioning on the nour-tfstate bucket.
-Use remote state locking with DynamoDB.
+The following diagram illustrates the Terraform design for the network application infrastructure, including AWS resources and Ansible integration. It is provided in Mermaid syntax and can be rendered in tools like Mermaid Live Editor (https://mermaid.live/) to generate a visual image.
 
 
-Modularity:
-Parameterize additional variables (e.g., region, instance type).
-Add validation to module variables.
+**Diagram Explanation**:
+- **Terraform Configuration**: The root module (`main.tf`) orchestrates the provisioning of AWS infrastructure and generates the Ansible inventory.
+- **AWS Infrastructure**:
+  - **VPC**: `main-vpc` with CIDR `10.0.0.0/16`.
+  - **Public Subnets**: Two subnets in `us-east-1a` and `us-east-1b`, connected to an internet gateway.
+  - **Private Subnets**: Two subnets in `us-east-1a` and `us-east-1b`, connected to a NAT gateway.
+  - **EC2 Instance**: A `t2.micro` instance (`web-server`) in a public subnet, running Docker containers (`networkapp:20`, `nginx-reverse-proxy:1.0`).
+  - **Security Group**: Allows inbound SSH (port 22) and HTTP (port 80), attached to the EC2 instance.
+  - **management User**: Created via user data script, enabling SSH and sudo access.
+  - **S3 Bucket**: `nour-tfstate` stores Terraform state.
+- **Ansible Integration**:
+  - The Ansible inventory (`aws_inventory.yml`) is generated with the EC2 public IP and `management` user.
+  - The Ansible playbook deploys the application to the EC2 instance.
+- **Rendering Instructions**:
+  - Copy the Mermaid code into Mermaid Live Editor (https://mermaid.live/).
+  - Select "Flowchart" and render to view the diagram.
+  - Export as PNG or SVG for use in documentation or presentations.
+- **Notes**:
+  - The diagram simplifies relationships (e.g., route tables are implied).
+  - Customize node labels or styles in Mermaid for specific needs.
 
+---
 
-Ansible Integration:
-Use Terraform's templatefile for more complex inventory formats.
-Validate inventory generation with a linter.
+## 5. Deployment Instructions
 
+1. **Prepare the Environment**:
+   - Install Terraform: `brew install terraform`.
+   - Configure AWS credentials: `aws configure` or set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+   - Create the S3 bucket `nour-tfstate` in `us-east-1`:
+     ```bash
+     aws s3 mb s3://nour-tfstate --region us-east-1
+     ```
 
-Cost Management:
-Use t3.micro instances for cost savings (if eligible for free tier).
-Tag resources for cost allocation: aws:createdBy=terraform.
+2. **Set Up the Project**:
+   - Create the directory structure and place files as described.
+   - Ensure the SSH key pair (`my-key`) exists in AWS `us-east-1`.
+   - Verify the AMI (`ami-084568db4383264d4`) is valid.
+   - Place the `user.sh` script in the project root.
 
+3. **Apply Terraform Configuration**:
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply -auto-approve
+   ```
 
+4. **Verify Resources**:
+   - Check EC2 instance:
+     ```bash
+     aws ec2 describe-instances --region us-east-1
+     ```
+   - Verify the `management` user:
+     ```bash
+     ssh -i my-key.pem management@<ec2-public-ip> "whoami"
+     ```
+   - Verify the Ansible inventory:
+     ```bash
+     cat ../ansible/inventory/aws_inventory.yml
+     ```
 
+5. **Run Ansible Playbook**:
+   ```bash
+   cd ../ansible
+   ansible-playbook -i inventory/aws_inventory.yml site.yml -e "selected_roles=['docker_install','docker_compose'] IMAGE_TAG=20"
+   ```
 
-6. Troubleshooting
+6. **Access the Application**:
+   ```bash
+   curl http://<ec2-public-ip>:80  # Via Nginx
+   curl http://<ec2-public-ip>:8000  # Direct to Gunicorn
+   ```
 
-Terraform Init Errors:
-Verify S3 bucket access: aws s3 ls s3://nour-tfstate.
-Check AWS credentials: aws sts get-caller-identity.
+7. **Clean Up**:
+   ```bash
+   terraform destroy -auto-approve
+   ```
 
+---
 
-EC2 Launch Failures:
-Confirm AMI validity: aws ec2 describe-images --image-ids ami-084568db4383264d4.
-Check subnet and security group attachments.
+## 6. Best Practices
 
+- **Security**:
+  - Restrict security group ingress to specific IPs (e.g., your IP for SSH).
+  - Use AWS Secrets Manager or Parameter Store for credentials.
+  - Enable VPC flow logs for monitoring.
+  - Limit `management` user sudo privileges in production.
+- **State Management**:
+  - Enable versioning on the `nour-tfstate` bucket.
+  - Use remote state locking with DynamoDB.
+- **Modularity**:
+  - Parameterize additional variables (e.g., region, instance type).
+  - Add validation to module variables.
+- **Ansible Integration**:
+  - Use Terraform's `templatefile` for more complex inventory formats.
+  - Validate inventory generation with a linter.
+- **Cost Management**:
+  - Use `t3.micro` instances for cost savings (if eligible for free tier).
+  - Tag resources for cost allocation: `aws:createdBy=terraform`.
 
-Ansible Inventory Issues:
-Ensure ../ansible/inventory/ exists.
-Verify public IP in aws_inventory.yml.
+---
 
+## 7. Troubleshooting
 
-Application Access:
-Check security group rules: aws ec2 describe-security-groups.
-View EC2 logs: ssh -i my-key.pem ubuntu@<ec2-public-ip> 'docker logs <container>'.
+- **Terraform Init Errors**:
+  - Verify S3 bucket access: `aws s3 ls s3://nour-tfstate`.
+  - Check AWS credentials: `aws sts get-caller-identity`.
+- **EC2 Launch Failures**:
+  - Confirm AMI validity: `aws ec2 describe-images --image-ids ami-084568db4383264d4`.
+  - Check subnet and security group attachments.
+- **User Data Issues**:
+  - Verify `user.sh` execution: `ssh -i my-key.pem ubuntu@<ec2-public-ip> 'cat /var/log/cloud-init-output.log'`.
+  - Ensure the default user (`ubuntu`) has `authorized_keys`.
+- **Ansible Inventory Issues**:
+  - Ensure `../ansible/inventory/` exists.
+  - Verify `ansible_user=management` in `aws_inventory.yml`.
+- **Application Access**:
+  - Check security group rules: `aws ec2 describe-security-groups`.
+  - View EC2 logs: `ssh -i my-key.pem management@<ec2-public-ip> 'docker logs <container>'`.
 
+---
 
+## 8. Conclusion
 
+This Terraform setup provisions a scalable AWS infrastructure for the Django network application, integrating seamlessly with Ansible for deployment. The modular design separates network, security, and compute concerns, while the S3 backend ensures reliable state management. The `user.sh` script creates a `management` user during EC2 launch, enabling secure SSH access for Ansible. The generated Ansible inventory enables automated application deployment using Docker Compose. The Mermaid diagram provides a clear visual representation of the infrastructure. For production, enhance security, state management, and cost optimization based on the best practices outlined.
 
-7. Conclusion
-This Terraform setup provisions a scalable AWS infrastructure for the Django network application, integrating seamlessly with Ansible for deployment. The modular design separates network, security, and compute concerns, while the S3 backend ensures reliable state management. The generated Ansible inventory enables automated application deployment using Docker Compose. For production, enhance security, state management, and cost optimization based on the best practices outlined.
 For further details, refer to the official Terraform, AWS, Ansible, Docker, and Django documentation.
