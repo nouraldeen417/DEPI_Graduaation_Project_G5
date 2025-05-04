@@ -1,7 +1,3 @@
-Here is the text with your provided format, syntax, and design intact:
-
----
-
 ## Deploying a Network Application with Kubernetes
 
 This document provides a comprehensive guide for deploying a Python/Django network application using Kubernetes. The application is containerized with Docker, uses Gunicorn as the WSGI server, and includes an Nginx reverse proxy for serving static files. Kubernetes manifests are used to define the application deployment, services, persistent storage, Nginx configuration, and an optional Ingress for external access. A bash script is provided to manage the application of these manifests.
