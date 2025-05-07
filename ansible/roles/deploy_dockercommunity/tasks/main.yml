@@ -1,0 +1,49 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Install required Python packages
+  pip:
+    name: 
+      - requests
+    state: present
+    executable: pip3
+
+- name: Create staticfiles volume
+  community.docker.docker_volume:
+    name: staticfiles
+    state: present
+
+- name: Create shared network
+  community.docker.docker_network:
+    name: app_network
+    state: present
+
+- name: Deploy web container
+  community.docker.docker_container:
+    name: web
+    image: "nouraldeen152/networkapp:{{ build_number }}"
+    state: started
+    restart: yes
+    ports:
+      - "8000:8000"
+    volumes:
+      - "staticfiles:/app/djangoapp/staticfiles"
+    networks:
+      - name: app_network
+        aliases:
+          - web
+    env:
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,{{ host_ip }}"
+      DJANGO_TRUSTED_ORIGIN: "http://localhost,http://{{ host_ip }}"
+
+- name: Deploy nginx container
+  community.docker.docker_container:
+    name: nginx
+    image: "nouraldeen152/nginx_reverse_proxy:{{ build_number }}"
+    state: started
+    restart: yes
+    ports:
+      - "80:80"
+    volumes:
+      - "staticfiles:/app/staticfiles"
+    networks:
+      - name: app_network

@@ -10,3 +10,4 @@
   roles:
     - { role: docker_install, when: "'docker_install' in selected_roles " } # 
     - { role: docker_compose, when: "'docker_compose' in selected_roles " } # 
+    - { role: deploy_dockercommunity, when: "'deploy_dockercommunity' in selected_roles " } #     
