@@ -23,8 +23,8 @@ def Pipeline_Flags = [
     PIPELINE_ACTION: 'build & deploy', // Empty to fall back to params or default  ['build & deploy', 'build only', 'deploy only']
     IMAGE_TAG: '0',    // Use custom build number
     SKIP_TESTS: true, // Skip tests if true
-    DEPLOY_K8S: true, // Deploy to Kubernetes if true
-    DEPLOY_AWS: true, // Deploy to AWS if true
+    DEPLOY_K8S: false, // Deploy to Kubernetes if true
+    DEPLOY_AWS: false, // Deploy to AWS if true
     DEPLOY_ONPREM: true, // Deploy to on-premises if true
 ]
 
