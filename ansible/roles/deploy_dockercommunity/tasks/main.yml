@@ -1,5 +1,10 @@
 #SPDX-License-Identifier: MIT-0
 ---
+- name: Get host's primary IP address
+  ansible.builtin.set_fact:
+    host_ip: "{{ ansible_default_ipv4.address }}"
+  when: host_ip is not defined
+
 - name: Install required Python packages
   pip:
     name: 
@@ -20,7 +25,7 @@
 - name: Deploy web container
   community.docker.docker_container:
     name: web
-    image: "nouraldeen152/networkapp:{{ build_number }}"
+    image: "nouraldeen152/networkapp:{{ build_number | default('latest') }}"
     state: started
     restart: yes
     ports:
@@ -38,7 +43,7 @@
 - name: Deploy nginx container
   community.docker.docker_container:
     name: nginx
-    image: "nouraldeen152/nginx_reverse_proxy:{{ build_number }}"
+    image: "nouraldeen152/nginx_reverse_proxy:{{ build_number | default('latest') }}"
     state: started
     restart: yes
     ports:
