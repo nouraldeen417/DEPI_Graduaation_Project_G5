@@ -189,133 +189,134 @@ pipeline {
                             env."${key}" = value
                         }
                         // Assign flags, prioritize params or defaults
-                        def defaults = [PIPELINE_ACTION: 'build only', ENABLE_FEATURE: 'false']
+                        // def defaults = [PIPELINE_ACTION: 'build only', ENABLE_FEATURE: 'false']
                         data.flags.each { key, value ->
-                            env."${key}" = (params[key] != null) ?: value ?: defaults[key]
+                            env."${key}" = (params[key] != null) ?: value 
                         }
                         // Verify
                         sh 'echo PIPELINE_ACTION is $PIPELINE_ACTION'
                         sh 'echo DEPLOY_K8S is $DEPLOY_K8S'
                         sh 'echo DEPLOY_AWS is $DEPLOY_AWS'
                         sh 'echo IMAGE_TAG is $IMAGE_TAG'
+                        sh 'echo onprem is $DEPLOY_ONPREM'
                 }
             }
         }
-//        Stage 2: Parallel Build Phase
-        stage('Build Phase') {
-            parallel {
-                // Parallel Image Building
-                stage('Build Images') {
-                 when { expression { env.PIPELINE_ACTION in ['build only', 'build & deploy'] }}
-                    steps {
-                        script {
-                            // build Docker images
-                            images.build()
-                        }
-                    }
-                }
+// //        Stage 2: Parallel Build Phase
+//         stage('Build Phase') {
+//             parallel {
+//                 // Parallel Image Building
+//                 stage('Build Images') {
+//                  when { expression { env.PIPELINE_ACTION in ['build only', 'build & deploy'] }}
+//                     steps {
+//                         script {
+//                             // build Docker images
+//                             images.build()
+//                         }
+//                     }
+//                 }
 
-                // Parallel Infrastructure Setup
-                stage('Build Infrastructure') {
-                    steps {
-                        script {
-                            if (env.DEPLOY_K8S == 'true') { k8s.buildInfra() }       // Not supported yet
-                            if (env.DEPLOY_AWS == 'true') {  aws.buildInfra() }
-                            if (env.DEPLOY_ONPREM == 'true') { onprem.buildInfra() } // Not supported yet
-                        }
-                    }
-                }
-            }
-        }
-        // Stage 3: Push Images
-        stage('Push Images') {
-            when {
-                expression { env.PIPELINE_ACTION in ['build only', 'build & deploy'] }
-            }
-            steps {
-                script {
-                    images.push()
-                }
-            }
-        }
-        // Stage 4: Testing
-        stage('Testing') {
-            when {
-                allOf {
-                    expression { !env.SKIP_TESTS }
-                    expression { env.PIPELINE_ACTION in ['build & deploy', 'deploy only'] }
-                }
-            }
-            steps {
-                echo 'Running test suite...'
-                // Add your test commands here
-            }
-        }
-        // Stage 5: Parallel Deploy Phase
-        stage('Deploy Phase') {
-            when {
-                expression { env.PIPELINE_ACTION in ['deploy only', 'build & deploy'] }
-            }
-            parallel {
-                // Kubernetes Deployment
-                stage('Deploy to K8s') {
-                    when { expression { env.DEPLOY_K8S == 'true'} }
-                    steps {
-                        script {
-                            k8s.prepare()
-                            k8s.deploy()
-                        }
-                    }
-                }
+//                 // Parallel Infrastructure Setup
+//                 stage('Build Infrastructure') {
+//                     steps {
+//                         script {
+//                             if (env.DEPLOY_K8S == 'true') { k8s.buildInfra() }       // Not supported yet
+//                             if (env.DEPLOY_AWS == 'true') {  aws.buildInfra() }
+//                             if (env.DEPLOY_ONPREM == 'true') { onprem.buildInfra() } // Not supported yet
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//         // Stage 3: Push Images
+//         stage('Push Images') {
+//             when {
+//                 expression { env.PIPELINE_ACTION in ['build only', 'build & deploy'] }
+//             }
+//             steps {
+//                 script {
+//                     images.push()
+//                 }
+//             }
+//         }
+//         // Stage 4: Testing
+//         stage('Testing') {
+//             when {
+//                 allOf {
+//                     expression { !env.SKIP_TESTS }
+//                     expression { env.PIPELINE_ACTION in ['build & deploy', 'deploy only'] }
+//                 }
+//             }
+//             steps {
+//                 echo 'Running test suite...'
+//                 // Add your test commands here
+//             }
+//         }
+//         // Stage 5: Parallel Deploy Phase
+//         stage('Deploy Phase') {
+//             when {
+//                 expression { env.PIPELINE_ACTION in ['deploy only', 'build & deploy'] }
+//             }
+//             parallel {
+//                 // Kubernetes Deployment
+//                 stage('Deploy to K8s') {
+//                     when { expression { env.DEPLOY_K8S == 'true'} }
+//                     steps {
+//                         script {
+//                             k8s.prepare()
+//                             k8s.deploy()
+//                         }
+//                     }
+//                 }
 
-                // AWS Deployment
-                stage('Deploy to AWS') {
-                    when { expression { env.DEPLOY_AWS == 'true' } }
-                    steps {
-                        script {
-                            aws.prepare_deployment()
-                            aws.deploy()
-                        }
-                    }
-                }
+//                 // AWS Deployment
+//                 stage('Deploy to AWS') {
+//                     when { expression { env.DEPLOY_AWS == 'true' } }
+//                     steps {
+//                         script {
+//                             aws.prepare_deployment()
+//                             aws.deploy()
+//                         }
+//                     }
+//                 }
 
-                // OnPrem Deployment
-                stage('Deploy to OnPrem') {
-                    when { expression { env.DEPLOY_ONPREM == 'true' } }
-                    steps {
-                        script {
-                            onprem.prepare_deployment()
-                            onprem.deploy()
-                        }
-                    }
-                }
-            }
-        }
-    }
-    post {
-        always {
-                echo "Cleaning up workspace..."       
-                }
-        success {
+//                 // OnPrem Deployment
+//                 stage('Deploy to OnPrem') {
+//                     when { expression { env.DEPLOY_ONPREM == 'true' } }
+//                     steps {
+//                         script {
+//                             onprem.prepare_deployment()
+//                             onprem.deploy()
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     post {
+//         always {
+//                 echo "Cleaning up workspace..."       
+//                 }
+//         success {
 
-            slackSend(
-                channel: env.SLACK_CHANNEL,
-                message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-            )
-        }
-        failure {
-            slackSend(
-                channel: env.SLACK_CHANNEL,
-                message: "❌ Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-            )
-        }
-        unstable {
-            slackSend(
-                channel: env.SLACK_CHANNEL,
-                message: "⚠️ Pipeline UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
-            )
-        }
-    }        
+//             slackSend(
+//                 channel: env.SLACK_CHANNEL,
+//                 message: "✅ Pipeline SUCCESSFUL: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+//             )
+//         }
+//         failure {
+//             slackSend(
+//                 channel: env.SLACK_CHANNEL,
+//                 message: "❌ Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+//             )
+//         }
+//         unstable {
+//             slackSend(
+//                 channel: env.SLACK_CHANNEL,
+//                 message: "⚠️ Pipeline UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}"
+//             )
+//         }
+//     }        
 
 }
 
