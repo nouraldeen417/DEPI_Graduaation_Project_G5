@@ -18,8 +18,7 @@ This project automates the CI/CD pipeline using a Jenkins container as the manag
 ---
 
 ## 🔁 Pipeline Flow
-![Project Diagram](./project diagram.png)
-
+<img src="./project diagram.png" alt="Project Diagram" width="500"/>
 ```text
                 ┌─────────────────────┐
                 │    Remote Repo      │
