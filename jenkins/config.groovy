@@ -25,7 +25,7 @@ def Pipeline_Flags = [
     SKIP_TESTS: true, // Skip tests if true
     DEPLOY_K8S: false, // Deploy to Kubernetes if true
     DEPLOY_AWS: false, // Deploy to AWS if true
-    DEPLOY_ONPREM: true, // Deploy to on-premises if true
+    DEPLOY_ONPREM: false, // Deploy to on-premises if true
 ]
 
 return [

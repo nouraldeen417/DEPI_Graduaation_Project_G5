@@ -7,3 +7,4 @@ docker_packages:
   - containerd.io
   - docker-compose-plugin
   - docker-buildx-plugin
+  - python3-pip 
