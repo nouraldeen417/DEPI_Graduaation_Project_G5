@@ -2,9 +2,7 @@
 ---
 - name: Get host's primary IP address
   ansible.builtin.set_fact:
-    host_ip: "{{ ansible_default_ipv4.address }}"
-  when: host_ip is not defined
-
+    host_ip: "{{ ansible_host }}"
 # - name: Install required Python packages
 #   pip:
 #     name: 
