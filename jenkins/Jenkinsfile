@@ -191,10 +191,8 @@ pipeline {
                         // Assign flags, prioritize params or defaults
                         // def defaults = [PIPELINE_ACTION: 'build only', ENABLE_FEATURE: 'false']
                         data.flags.each { key, value ->
-                            def paramValue = params[key]
-                            // Set env."${key}" based on type safety
-                            env."${key}" = (paramValue != null) ? paramValue : value 
-                            // env."${key}" = params[key]  ?: value 
+
+                            env."${key}" = params[key].toString()  ?: value 
                         }
 
                 }
