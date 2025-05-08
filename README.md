@@ -18,7 +18,7 @@ This project automates the CI/CD pipeline using a Jenkins container as the manag
 ---
 
 ## 🔁 Pipeline Flow
-![Project Diagram](project diagram.png)
+![Project Diagram](./project diagram.png)
 
 ```text
                 ┌─────────────────────┐
