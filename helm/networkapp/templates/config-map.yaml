@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.components.nginx.base }}-config
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+data:
+  nginx.conf: |
+    server {
+        listen {{ .Values.nginx.container.port }};
+        server_name localhost;
+
+        location /static/ {
+            alias {{ .Values.nginx.container.staticFilesPath }};
+        }
+
+        location /media/ {
+            alias /app/media/;
+        }
+
+        location / {
+            proxy_pass http://{{ .Release.Name }}-{{ .Values.components.app.base }}-service:{{ .Values.app.service.port }};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+    }

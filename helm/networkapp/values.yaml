@@ -1,0 +1,89 @@
+# Common values that might be shared
+global:
+  staticFilesPath: "/app/staticfiles/"
+
+# components/base-names.yaml (separate file for clarity)
+components:
+  nginx:
+    base: "nginx"  # Used for all nginx resources
+  app:
+    base: "app"    # Used for main application
+
+# NGINX specific configuration
+nginx:
+  enabled: true
+  deployment:
+    replicas: 1
+    additionalLabels: {}
+    podLabels: {}
+  
+  container:
+    name: nginx
+    image: nginx
+    tag: latest
+    port: 80
+    staticFilesPath: "/app/staticfiles/"
+  
+  service:
+    name: ""
+    portName: http  # Named port
+    type: NodePort
+    port: 80
+    nodePort: 30008
+  
+  configMap:
+    name: ""
+  
+  pvc:
+    name: ""
+
+# Main application configuration
+app:
+  enabled: true
+  deployment:
+    replicas: 1
+    additionalLabels: {}
+    podLabels: {}
+  
+  container:
+    name: main-app
+    image: nouraldeen152/networkapp
+    tag: 19
+    port: 8000
+  
+  service:
+    name: app
+    type: ClusterIP
+    port: 8000
+    nodePort: ""
+
+django:
+  env:
+    ALLOWED_HOSTS: "localhost,127.0.0.1,192.168.1.150"
+    TRUSTED_ORIGIN: "http://localhost:30008,http://192.168.1.150:30008,http://192.168.1.150:32635"
+# Persistence Configuration
+persistence:
+  enabled: true
+  capacity: 1Gi
+  accessMode: ReadWriteOnce
+  # Choose either hostPath or storageClass
+  hostPath:
+    path: /mnt/data
+  # storageClass: "standard" # Uncomment to use dynamic provisioning    
+
+
+ingress-nginx:
+  enabled: false    # ← This actually installs the controller
+  namespace: "ingress-nginx"  # ← Custom namespace here  
+  controller:
+    ingressClassResource:
+      name: nginx  # Must match your ingressClassName
+    service:
+      type: NodePort  # Or NodePort for bare metal
+
+# Your app's ingress configuration
+ingress:
+  enabled: true
+  host: "networkapp.local"  # ← Your custom hostname  
+  className: "nginx"  # Must match above
+  port: 80

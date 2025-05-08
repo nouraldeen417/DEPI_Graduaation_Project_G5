@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+    {{- with .Values.app.deployment.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ .Release.Name }}-{{ .Values.components.app.base }}-deployment
+spec:
+  replicas: {{ .Values.app.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.selectorLabels" . | nindent 8 }}
+        {{- with .Values.app.deployment.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      containers:
+      - name: {{ .Values.app.container.name }}
+        image: {{ .Values.app.container.image }}:{{ .Values.app.container.tag }}
+        ports:
+        - containerPort: {{ .Values.app.container.port }}
+        env:
+        {{- range $key, $value := .Values.django.env }}
+          - name: DJANGO_{{ $key | upper }}
+            value: {{ $value | quote }}
+        {{- end }}
+      #   volumeMounts:
+      #   - name: shared-storage
+      #     mountPath: /app/djangoapp/staticfiles
+      # volumes:
+      # - name: shared-storage
+      #   persistentVolumeClaim:
+      #     claimName: my-pvc          
+
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.components.app.base }}-service
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "app.selectorLabels" . | nindent 4 }}
+  type: {{ .Values.app.service.type }}
+  ports:
+  - port: {{ .Values.app.service.port }}
+    protocol: TCP
+    targetPort: {{ .Values.app.container.port }}
+    {{- if eq .Values.app.service.type "NodePort" }}
+    nodePort: {{ .Values.app.service.nodePort }}
+    {{- end }}
