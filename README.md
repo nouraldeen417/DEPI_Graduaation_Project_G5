@@ -55,9 +55,10 @@ Deployment target is selected through Jenkins parameters or Git branch strategy.
 ### Options:
 
 1. **AWS EC2**
-<img src="./terraform.png" alt="terraform" width="500"/>
-
    * Terraform used to provision infrastructure if it doesn't exist
+
+   <img src="./terraform.png" alt="terraform" width="500"/>
+
    * Ansible used to configure EC2 instances and deploy the application
 
 2. **Remote VM**
@@ -65,10 +66,10 @@ Deployment target is selected through Jenkins parameters or Git branch strategy.
    * SSH-based deployment using Ansible playbooks
 
 3. **Kubernetes Cluster**
-<img src="./kubernates.png" alt="kubernates" width="500"/>
 
    * Uses `kubeadm` if the cluster is not already initialized
-   * Ansible deploys the app as a deployment or via Helm
+   <img src="./kubernates.png" alt="kubernates" width="500"/>
+   * Helm deploys the app as a deployment or via script bash
 
 ---
 
