@@ -166,7 +166,7 @@ pipeline {
     // Define parameters
     parameters {
         choice(name: 'PIPELINE_ACTION', choices: ['','build & deploy', 'build only', 'deploy only'], description: 'Choose pipeline action')
-        integer(name: 'CUSTOM_BUILD_NUMBER', defaultValue: "${BUILD_NUMBER}", description: 'Image tag (default: BUILD_NUMBER)')
+        string(name: 'CUSTOM_BUILD_NUMBER', defaultValue: "${BUILD_NUMBER}", description: 'Image tag (default: BUILD_NUMBER)')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip running tests')
         // Checkbox-style environment selection
         booleanParam(name: 'DEPLOY_K8S', defaultValue: false, description: 'Deploy to Kubernetes')
@@ -191,7 +191,10 @@ pipeline {
                         // Assign flags, prioritize params or defaults
                         // def defaults = [PIPELINE_ACTION: 'build only', ENABLE_FEATURE: 'false']
                         data.flags.each { key, value ->
-                            env."${key}" = params[key]  ?: value 
+                            def paramValue = params[key]
+                            // Set env."${key}" based on type safety
+                            env."${key}" = (paramValue != null) ? paramValue : value 
+                            // env."${key}" = params[key]  ?: value 
                         }
 
                 }
