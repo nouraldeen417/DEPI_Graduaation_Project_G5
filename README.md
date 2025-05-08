@@ -136,13 +136,12 @@ After successful deployment, the pipeline sends a status notification to a Slack
 ## 🧪 Example Jenkins Parameters
 
 ```bash
-ACTION=build      # Only build and push image
-ACTION=deploy     # Only deploy
-ACTION=both       # Build and deploy
-
-TARGET=aws        # Deploy to AWS
-TARGET=vm         # Deploy to Remote VM
-TARGET=k8s        # Deploy to Kubernetes
+PIPELINE_ACTION: 'build & deploy', // Empty to fall back to params or default  ['build & deploy', 'build only', 'deploy only']
+IMAGE_TAG: '0',    // Use custom build number
+SKIP_TESTS: true, // Skip tests if true
+DEPLOY_K8S: false, // Deploy to Kubernetes if true
+DEPLOY_AWS: false, // Deploy to AWS if true
+DEPLOY_ONPREM: false, // Deploy to on-premises if true
 ```
 
 ---
