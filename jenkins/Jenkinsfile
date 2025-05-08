@@ -201,7 +201,7 @@ pipeline {
                         sh 'echo onprem is $DEPLOY_ONPREM'
                 }
             }
-        }
+        }}
 // //        Stage 2: Parallel Build Phase
 //         stage('Build Phase') {
 //             parallel {
