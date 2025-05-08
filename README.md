@@ -1,6 +1,7 @@
 # CI/CD Management Server Overview
 
 This project automates the CI/CD pipeline using a Jenkins container as the management server. It listens to repository changes, processes pipeline logic defined in a Groovy script, and performs conditional build and deployment actions across multiple environments.
+<img src="./application_overview.png" alt="application_overview" width="1000"/>
 
 ---
 
@@ -18,35 +19,8 @@ This project automates the CI/CD pipeline using a Jenkins container as the manag
 ---
 
 ## 🔁 Pipeline Flow
-<img src="./project diagram.png" alt="Project Diagram" width="500"/>
-```text
-                ┌─────────────────────┐
-                │    Remote Repo      │
-                └────────┬────────────┘
-                         │ Push
-                         ▼
-                ┌─────────────────────┐
-                │ Jenkins Container   │
-                └────────┬────────────┘
-                         │
-             ┌───────────┴───────────┐
-             │                       │
-           Build                  Deploy
-             │                       │
-  ┌──────────▼──────────┐   ┌────────▼─────────┐
-  │ Build Docker Image  │   │ Select Target    │◄────────────────────┐
-  │ Tag & Push to Reg   │   │ (via Jenkins UI) │                     │
-  └─────────────────────┘   └────────┬─────────┘                     │
-                                     ▼                               │
-         ┌────────────┬─────────────┼────────────┐                   │
-         ▼            ▼             ▼            │                   │
-     AWS EC2        Remote VM      K8s Cluster   │                   │
-     (Terraform +   (Ansible)      (kubeadm +    │                   │
-      Ansible)                      Ansible)      │                   │
-         │                                     Notify via Slack ◄────┘
-         ▼
-  Create Infra if
-  not existing
+<img src="./project diagram.png" alt="Project Diagram" width="1000"/>
+
 ````
 
 ---
@@ -145,6 +119,13 @@ DEPLOY_ONPREM: false, // Deploy to on-premises if true
 ```
 
 ---
+
+````
+## Terraform design
+<img src="./terraform.png" alt="terraform" width="1000"/>
+
+## kubernates structure
+<img src="./kubernates.png" alt="kubernates" width="1000"/>
 
 ## 📬 Contact
 
