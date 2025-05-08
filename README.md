@@ -68,7 +68,11 @@ Deployment target is selected through Jenkins parameters or Git branch strategy.
 3. **Kubernetes Cluster**
 
    * Uses `kubeadm` if the cluster is not already initialized
+   
+
    <img src="./kubernates.png" alt="kubernates" width="500"/>
+
+
    * Helm deploys the app as a deployment or via script bash
 
 ---
