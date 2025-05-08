@@ -23,6 +23,7 @@ This project automates the CI/CD pipeline using a Jenkins container as the manag
 
 ````
 
+````
 ---
 
 ## 📄 `pipeline-config.groovy`
@@ -46,6 +47,7 @@ This Groovy file acts as the controller for the Jenkins pipeline. It:
 
 ---
 
+
 ## 🚀 Deploy Stage
 
 Deployment target is selected through Jenkins parameters or Git branch strategy.
@@ -53,6 +55,7 @@ Deployment target is selected through Jenkins parameters or Git branch strategy.
 ### Options:
 
 1. **AWS EC2**
+<img src="./terraform.png" alt="terraform" width="1000"/>
 
    * Terraform used to provision infrastructure if it doesn't exist
    * Ansible used to configure EC2 instances and deploy the application
@@ -62,6 +65,7 @@ Deployment target is selected through Jenkins parameters or Git branch strategy.
    * SSH-based deployment using Ansible playbooks
 
 3. **Kubernetes Cluster**
+<img src="./kubernates.png" alt="kubernates" width="1000"/>
 
    * Uses `kubeadm` if the cluster is not already initialized
    * Ansible deploys the app as a deployment or via Helm
@@ -120,12 +124,6 @@ DEPLOY_ONPREM: false, // Deploy to on-premises if true
 
 ---
 
-````
-## Terraform design
-<img src="./terraform.png" alt="terraform" width="1000"/>
-
-## kubernates structure
-<img src="./kubernates.png" alt="kubernates" width="1000"/>
 
 ## 📬 Contact
 
