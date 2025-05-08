@@ -5,12 +5,12 @@
     host_ip: "{{ ansible_default_ipv4.address }}"
   when: host_ip is not defined
 
-- name: Install required Python packages
-  pip:
-    name: 
-      - requests
-    state: present
-    executable: pip3
+# - name: Install required Python packages
+#   pip:
+#     name: 
+#       - requests
+#     state: present
+#     executable: pip3
 
 - name: Create staticfiles volume
   community.docker.docker_volume:
