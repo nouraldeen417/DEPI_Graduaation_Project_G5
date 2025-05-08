@@ -193,14 +193,19 @@ pipeline {
                         data.flags.each { key, value ->
                             env."${key}" = (params[key] != null) ?: value 
                         }
-                        // Verify
-                        sh 'echo PIPELINE_ACTION is env.PIPELINE_ACTION'
-                        sh 'echo DEPLOY_K8S is env.DEPLOY_K8S '
-                        sh 'echo DEPLOY_AWS is env.DEPLOY_AWS'
-                        sh 'echo IMAGE_TAG is env.IMAGE_TAG'
-                        sh 'echo onprem is env.DEPLOY_ONPREM'
+
                 }
             }
+        }    
+            stage('Debug') {
+            steps {
+                        // Verify
+                      echo "PIPELINE_ACTION is ${env.PIPELINE_ACTION}"
+                      echo "DEPLOY_K8S is ${env.DEPLOY_K8S} "
+                      echo "DEPLOY_AWS is ${env.DEPLOY_AWS}"
+                      echo "IMAGE_TAG is ${env.IMAGE_TAG}"
+                      echo "onprem is ${env.DEPLOY_ONPREM}"
+                                  }
         }}
 // //        Stage 2: Parallel Build Phase
 //         stage('Build Phase') {
