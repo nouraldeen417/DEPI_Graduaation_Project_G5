@@ -898,3 +898,265 @@ core/2.18/reference_appendices/interpreter_discovery.html for more information.
 2025-05-07 22:13:22,731 p=8380 u=root n=ansible INFO| changed: [server_01]
 2025-05-07 22:13:22,793 p=8380 u=root n=ansible INFO| PLAY RECAP ******************************************************************************************************************
 2025-05-07 22:13:22,794 p=8380 u=root n=ansible INFO| server_01                  : ok=7    changed=2    unreachable=0    failed=0    skipped=10   rescued=0    ignored=0   
+2025-05-14 19:07:36,916 p=7556 u=root n=ansible INFO| PLAY [Apply selected roles] *************************************************************************************************
+2025-05-14 19:07:37,169 p=7556 u=root n=ansible INFO| TASK [Gathering Facts] ******************************************************************************************************
+2025-05-14 19:07:37,619 p=7556 u=root n=ansible INFO| fatal: [server_01]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: root@192.168.1.150: Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password).", "unreachable": true}
+2025-05-14 19:07:37,621 p=7556 u=root n=ansible INFO| PLAY RECAP ******************************************************************************************************************
+2025-05-14 19:07:37,622 p=7556 u=root n=ansible INFO| server_01                  : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+2025-05-14 19:08:05,776 p=7652 u=root n=ansible INFO| PLAY [Apply selected roles] *************************************************************************************************
+2025-05-14 19:08:05,841 p=7652 u=root n=ansible INFO| TASK [Gathering Facts] ******************************************************************************************************
+2025-05-14 19:08:17,822 p=7652 u=root n=ansible WARNING| [WARNING]: Platform linux on host server_01 is using the discovered Python interpreter at /usr/bin/python3.11, but future
+installation of another Python interpreter could change the meaning of that path. See https://docs.ansible.com/ansible-
+core/2.18/reference_appendices/interpreter_discovery.html for more information.
+
+2025-05-14 19:08:17,823 p=7652 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:08:17,877 p=7652 u=root n=ansible INFO| TASK [docker_install : Add Docker GPG key (Debian/Ubuntu)] ******************************************************************
+2025-05-14 19:08:17,919 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:17,977 p=7652 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (Debian/Ubuntu)] ***************************************************************
+2025-05-14 19:08:18,012 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,061 p=7652 u=root n=ansible INFO| TASK [docker_install : Install Docker (Debian/Ubuntu)] **********************************************************************
+2025-05-14 19:08:18,096 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,141 p=7652 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (CentOS)] **********************************************************************
+2025-05-14 19:08:18,170 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,234 p=7652 u=root n=ansible INFO| TASK [docker_install : Install Docker (CentOS)] *****************************************************************************
+2025-05-14 19:08:18,272 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,326 p=7652 u=root n=ansible INFO| TASK [docker_install : Ensure Docker service is started and enabled] ********************************************************
+2025-05-14 19:08:18,358 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,407 p=7652 u=root n=ansible INFO| TASK [docker_install : Add user to docker group (optional)] *****************************************************************
+2025-05-14 19:08:18,452 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,558 p=7652 u=root n=ansible INFO| TASK [docker_compose : Get ansible user home directory] *********************************************************************
+2025-05-14 19:08:18,594 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,656 p=7652 u=root n=ansible INFO| TASK [docker_compose : Copy docker-compose.yml to home directory] ***********************************************************
+2025-05-14 19:08:18,694 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,746 p=7652 u=root n=ansible INFO| TASK [docker_compose : Run Docker Compose from home directory] **************************************************************
+2025-05-14 19:08:18,787 p=7652 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:08:18,912 p=7652 u=root n=ansible INFO| TASK [deploy_dockercommunity : Get host's primary IP address] ***************************************************************
+2025-05-14 19:08:18,969 p=7652 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:08:19,015 p=7652 u=root n=ansible INFO| TASK [deploy_dockercommunity : Create staticfiles volume] *******************************************************************
+2025-05-14 19:08:26,000 p=7652 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:08:26,070 p=7652 u=root n=ansible INFO| TASK [deploy_dockercommunity : Create shared network] ***********************************************************************
+2025-05-14 19:08:33,140 p=7652 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:08:33,197 p=7652 u=root n=ansible INFO| TASK [deploy_dockercommunity : Deploy web container] ************************************************************************
+2025-05-14 19:08:42,167 p=7652 u=root n=ansible INFO| changed: [server_01]
+2025-05-14 19:08:42,226 p=7652 u=root n=ansible INFO| TASK [deploy_dockercommunity : Deploy nginx container] **********************************************************************
+2025-05-14 19:08:50,038 p=7652 u=root n=ansible INFO| fatal: [server_01]: FAILED! => {"changed": false, "msg": "Error starting container 04379b4d5b323ceaa76324c678aa9fec2e22dbee4d864456a62d4511ba989d42: 400 Client Error for http+docker://localhost/v1.47/containers/04379b4d5b323ceaa76324c678aa9fec2e22dbee4d864456a62d4511ba989d42/start: Bad Request (\"failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error mounting \"/root/DEPI_Graduaation_Project_G5/nginx/nginx.conf\" to rootfs at \"/etc/nginx/conf.d/default.conf\": create mountpoint for /etc/nginx/conf.d/default.conf mount: cannot create subdirectories in \"/var/lib/docker/overlay2/0cce0bc428e36f1eaa173a4f7f5992c1004d6292b70ac1a6994db9974c6affe6/merged/etc/nginx/conf.d/default.conf\": not a directory: unknown: Are you trying to mount a directory onto a file (or vice-versa)? Check if the specified host path exists and is the expected type\")"}
+2025-05-14 19:08:50,042 p=7652 u=root n=ansible INFO| PLAY RECAP ******************************************************************************************************************
+2025-05-14 19:08:50,042 p=7652 u=root n=ansible INFO| server_01                  : ok=5    changed=1    unreachable=0    failed=1    skipped=10   rescued=0    ignored=0   
+2025-05-14 19:11:45,692 p=8055 u=root n=ansible INFO| PLAY [Apply selected roles] *************************************************************************************************
+2025-05-14 19:11:45,764 p=8055 u=root n=ansible INFO| TASK [Gathering Facts] ******************************************************************************************************
+2025-05-14 19:11:57,368 p=8055 u=root n=ansible WARNING| [WARNING]: Platform linux on host server_01 is using the discovered Python interpreter at /usr/bin/python3.11, but future
+installation of another Python interpreter could change the meaning of that path. See https://docs.ansible.com/ansible-
+core/2.18/reference_appendices/interpreter_discovery.html for more information.
+
+2025-05-14 19:11:57,369 p=8055 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:11:57,422 p=8055 u=root n=ansible INFO| TASK [docker_install : Add Docker GPG key (Debian/Ubuntu)] ******************************************************************
+2025-05-14 19:11:57,466 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:57,517 p=8055 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (Debian/Ubuntu)] ***************************************************************
+2025-05-14 19:11:57,556 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:57,609 p=8055 u=root n=ansible INFO| TASK [docker_install : Install Docker (Debian/Ubuntu)] **********************************************************************
+2025-05-14 19:11:57,647 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:57,704 p=8055 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (CentOS)] **********************************************************************
+2025-05-14 19:11:57,748 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:57,801 p=8055 u=root n=ansible INFO| TASK [docker_install : Install Docker (CentOS)] *****************************************************************************
+2025-05-14 19:11:57,842 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:57,895 p=8055 u=root n=ansible INFO| TASK [docker_install : Ensure Docker service is started and enabled] ********************************************************
+2025-05-14 19:11:57,923 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:57,963 p=8055 u=root n=ansible INFO| TASK [docker_install : Add user to docker group (optional)] *****************************************************************
+2025-05-14 19:11:57,989 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:58,056 p=8055 u=root n=ansible INFO| TASK [docker_compose : Get ansible user home directory] *********************************************************************
+2025-05-14 19:11:58,086 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:58,154 p=8055 u=root n=ansible INFO| TASK [docker_compose : Copy docker-compose.yml to home directory] ***********************************************************
+2025-05-14 19:11:58,190 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:58,245 p=8055 u=root n=ansible INFO| TASK [docker_compose : Run Docker Compose from home directory] **************************************************************
+2025-05-14 19:11:58,283 p=8055 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:11:58,393 p=8055 u=root n=ansible INFO| TASK [deploy_dockercommunity : Get host's primary IP address] ***************************************************************
+2025-05-14 19:11:58,463 p=8055 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:11:58,516 p=8055 u=root n=ansible INFO| TASK [deploy_dockercommunity : Create staticfiles volume] *******************************************************************
+2025-05-14 19:12:05,057 p=8055 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:12:05,104 p=8055 u=root n=ansible INFO| TASK [deploy_dockercommunity : Create shared network] ***********************************************************************
+2025-05-14 19:12:12,130 p=8055 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:12:12,246 p=8055 u=root n=ansible INFO| TASK [deploy_dockercommunity : Debug external file path] ********************************************************************
+2025-05-14 19:12:12,312 p=8055 u=root n=ansible INFO| ok: [server_01] => {
+    "msg": "Trying to include file at: /root/DEPI_Graduaation_Project_G5/ansible/../nginx/nginx.conf"
+}
+2025-05-14 19:12:12,365 p=8055 u=root n=ansible INFO| TASK [deploy_dockercommunity : Deploy web container] ************************************************************************
+2025-05-14 19:12:21,326 p=8055 u=root n=ansible INFO| changed: [server_01]
+2025-05-14 19:12:21,377 p=8055 u=root n=ansible INFO| TASK [deploy_dockercommunity : Deploy nginx container] **********************************************************************
+2025-05-14 19:12:29,201 p=8055 u=root n=ansible INFO| fatal: [server_01]: FAILED! => {"changed": false, "msg": "Error starting container 04379b4d5b323ceaa76324c678aa9fec2e22dbee4d864456a62d4511ba989d42: 400 Client Error for http+docker://localhost/v1.47/containers/04379b4d5b323ceaa76324c678aa9fec2e22dbee4d864456a62d4511ba989d42/start: Bad Request (\"failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error mounting \"/root/DEPI_Graduaation_Project_G5/nginx/nginx.conf\" to rootfs at \"/etc/nginx/conf.d/default.conf\": create mountpoint for /etc/nginx/conf.d/default.conf mount: cannot create subdirectories in \"/var/lib/docker/overlay2/0cce0bc428e36f1eaa173a4f7f5992c1004d6292b70ac1a6994db9974c6affe6/merged/etc/nginx/conf.d/default.conf\": not a directory: unknown: Are you trying to mount a directory onto a file (or vice-versa)? Check if the specified host path exists and is the expected type\")"}
+2025-05-14 19:12:29,205 p=8055 u=root n=ansible INFO| PLAY RECAP ******************************************************************************************************************
+2025-05-14 19:12:29,206 p=8055 u=root n=ansible INFO| server_01                  : ok=6    changed=1    unreachable=0    failed=1    skipped=10   rescued=0    ignored=0   
+2025-05-14 19:13:40,623 p=8467 u=root n=ansible INFO| PLAY [Apply selected roles] *************************************************************************************************
+2025-05-14 19:13:40,686 p=8467 u=root n=ansible INFO| TASK [Gathering Facts] ******************************************************************************************************
+2025-05-14 19:13:52,146 p=8467 u=root n=ansible WARNING| [WARNING]: Platform linux on host server_01 is using the discovered Python interpreter at /usr/bin/python3.11, but future
+installation of another Python interpreter could change the meaning of that path. See https://docs.ansible.com/ansible-
+core/2.18/reference_appendices/interpreter_discovery.html for more information.
+
+2025-05-14 19:13:52,147 p=8467 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:13:52,201 p=8467 u=root n=ansible INFO| TASK [docker_install : Add Docker GPG key (Debian/Ubuntu)] ******************************************************************
+2025-05-14 19:13:52,244 p=8467 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:13:52,297 p=8467 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (Debian/Ubuntu)] ***************************************************************
+2025-05-14 19:13:52,337 p=8467 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:13:52,385 p=8467 u=root n=ansible INFO| TASK [docker_install : Install Docker (Debian/Ubuntu)] **********************************************************************
+2025-05-14 19:13:52,417 p=8467 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:13:52,483 p=8467 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (CentOS)] **********************************************************************
+2025-05-14 19:13:52,526 p=8467 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:13:52,581 p=8467 u=root n=ansible INFO| TASK [docker_install : Install Docker (CentOS)] *****************************************************************************
+2025-05-14 19:13:52,625 p=8467 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:13:52,678 p=8467 u=root n=ansible INFO| TASK [docker_install : Ensure Docker service is started and enabled] ********************************************************
+2025-05-14 19:13:52,714 p=8467 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:13:52,763 p=8467 u=root n=ansible INFO| TASK [docker_install : Add user to docker group (optional)] *****************************************************************
+2025-05-14 19:13:52,796 p=8467 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:13:52,897 p=8467 u=root n=ansible INFO| TASK [docker_compose : Get ansible user home directory] *********************************************************************
+2025-05-14 19:13:52,952 p=8467 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:13:53,013 p=8467 u=root n=ansible INFO| TASK [docker_compose : Copy docker-compose.yml to home directory] ***********************************************************
+2025-05-14 19:14:04,752 p=8467 u=root n=ansible INFO| changed: [server_01]
+2025-05-14 19:14:04,806 p=8467 u=root n=ansible INFO| TASK [docker_compose : Run Docker Compose from home directory] **************************************************************
+2025-05-14 19:14:04,855 p=8467 u=root n=ansible INFO| fatal: [server_01]: FAILED! => {"msg": "The field 'environment' has an invalid value, which includes an undefined variable.. 'IMAGE_TAG' is undefined\n\nThe error appears to be in '/root/DEPI_Graduaation_Project_G5/ansible/roles/docker_compose/tasks/main.yml': line 12, column 3, but may\nbe elsewhere in the file depending on the exact syntax problem.\n\nThe offending line appears to be:\n\n\n- name: Run Docker Compose from home directory\n  ^ here\n"}
+2025-05-14 19:14:04,857 p=8467 u=root n=ansible INFO| PLAY RECAP ******************************************************************************************************************
+2025-05-14 19:14:04,858 p=8467 u=root n=ansible INFO| server_01                  : ok=3    changed=1    unreachable=0    failed=1    skipped=7    rescued=0    ignored=0   
+2025-05-14 19:16:59,792 p=8705 u=root n=ansible INFO| PLAY [Apply selected roles] *************************************************************************************************
+2025-05-14 19:16:59,853 p=8705 u=root n=ansible INFO| TASK [Gathering Facts] ******************************************************************************************************
+2025-05-14 19:17:12,006 p=8705 u=root n=ansible WARNING| [WARNING]: Platform linux on host server_01 is using the discovered Python interpreter at /usr/bin/python3.11, but future
+installation of another Python interpreter could change the meaning of that path. See https://docs.ansible.com/ansible-
+core/2.18/reference_appendices/interpreter_discovery.html for more information.
+
+2025-05-14 19:17:12,007 p=8705 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:17:12,054 p=8705 u=root n=ansible INFO| TASK [docker_install : Add Docker GPG key (Debian/Ubuntu)] ******************************************************************
+2025-05-14 19:17:12,093 p=8705 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:17:12,147 p=8705 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (Debian/Ubuntu)] ***************************************************************
+2025-05-14 19:17:12,181 p=8705 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:17:12,234 p=8705 u=root n=ansible INFO| TASK [docker_install : Install Docker (Debian/Ubuntu)] **********************************************************************
+2025-05-14 19:17:12,275 p=8705 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:17:12,336 p=8705 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (CentOS)] **********************************************************************
+2025-05-14 19:17:12,372 p=8705 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:17:12,425 p=8705 u=root n=ansible INFO| TASK [docker_install : Install Docker (CentOS)] *****************************************************************************
+2025-05-14 19:17:12,467 p=8705 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:17:12,520 p=8705 u=root n=ansible INFO| TASK [docker_install : Ensure Docker service is started and enabled] ********************************************************
+2025-05-14 19:17:12,560 p=8705 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:17:12,615 p=8705 u=root n=ansible INFO| TASK [docker_install : Add user to docker group (optional)] *****************************************************************
+2025-05-14 19:17:12,665 p=8705 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:17:12,766 p=8705 u=root n=ansible INFO| TASK [docker_compose : Get ansible user home directory] *********************************************************************
+2025-05-14 19:17:12,826 p=8705 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:17:12,875 p=8705 u=root n=ansible INFO| TASK [docker_compose : Copy docker-compose.yml to home directory] ***********************************************************
+2025-05-14 19:17:22,639 p=8705 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:17:22,693 p=8705 u=root n=ansible INFO| TASK [docker_compose : Run Docker Compose from home directory] **************************************************************
+2025-05-14 19:17:33,623 p=8705 u=root n=ansible INFO| fatal: [server_01]: FAILED! => {"changed": true, "cmd": ["docker", "compose", "up", "-d"], "delta": "0:00:04.683401", "end": "2025-05-14 19:17:32.522803", "msg": "non-zero return code", "rc": 15, "start": "2025-05-14 19:17:27.839402", "stderr": "empty compose file", "stderr_lines": ["empty compose file"], "stdout": "", "stdout_lines": []}
+2025-05-14 19:17:33,626 p=8705 u=root n=ansible INFO| PLAY RECAP ******************************************************************************************************************
+2025-05-14 19:17:33,627 p=8705 u=root n=ansible INFO| server_01                  : ok=3    changed=0    unreachable=0    failed=1    skipped=7    rescued=0    ignored=0   
+2025-05-14 19:29:45,649 p=9460 u=root n=ansible ERROR|  [ERROR]: User interrupted execution
+
+2025-05-14 19:29:53,478 p=9489 u=root n=ansible INFO| PLAY [Apply selected roles] *************************************************************************************************
+2025-05-14 19:29:53,541 p=9489 u=root n=ansible INFO| TASK [Gathering Facts] ******************************************************************************************************
+2025-05-14 19:30:05,827 p=9489 u=root n=ansible WARNING| [WARNING]: Platform linux on host server_01 is using the discovered Python interpreter at /usr/bin/python3.11, but future
+installation of another Python interpreter could change the meaning of that path. See https://docs.ansible.com/ansible-
+core/2.18/reference_appendices/interpreter_discovery.html for more information.
+
+2025-05-14 19:30:05,828 p=9489 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:30:05,878 p=9489 u=root n=ansible INFO| TASK [docker_install : Add Docker GPG key (Debian/Ubuntu)] ******************************************************************
+2025-05-14 19:30:05,928 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:05,986 p=9489 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (Debian/Ubuntu)] ***************************************************************
+2025-05-14 19:30:06,027 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,079 p=9489 u=root n=ansible INFO| TASK [docker_install : Install Docker (Debian/Ubuntu)] **********************************************************************
+2025-05-14 19:30:06,113 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,176 p=9489 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (CentOS)] **********************************************************************
+2025-05-14 19:30:06,211 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,268 p=9489 u=root n=ansible INFO| TASK [docker_install : Install Docker (CentOS)] *****************************************************************************
+2025-05-14 19:30:06,316 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,377 p=9489 u=root n=ansible INFO| TASK [docker_install : Ensure Docker service is started and enabled] ********************************************************
+2025-05-14 19:30:06,416 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,471 p=9489 u=root n=ansible INFO| TASK [docker_install : Add user to docker group (optional)] *****************************************************************
+2025-05-14 19:30:06,506 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,612 p=9489 u=root n=ansible INFO| TASK [docker_compose : Get ansible user home directory] *********************************************************************
+2025-05-14 19:30:06,646 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,707 p=9489 u=root n=ansible INFO| TASK [docker_compose : Copy docker-compose.yml to home directory] ***********************************************************
+2025-05-14 19:30:06,748 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,799 p=9489 u=root n=ansible INFO| TASK [docker_compose : Run Docker Compose from home directory] **************************************************************
+2025-05-14 19:30:06,843 p=9489 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:30:06,953 p=9489 u=root n=ansible INFO| TASK [deploy_dockercommunity : Get host's primary IP address] ***************************************************************
+2025-05-14 19:30:07,013 p=9489 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:30:07,070 p=9489 u=root n=ansible INFO| TASK [deploy_dockercommunity : Copy nginx.conf to remote server] ************************************************************
+2025-05-14 19:30:18,277 p=9489 u=root n=ansible INFO| changed: [server_01]
+2025-05-14 19:30:18,356 p=9489 u=root n=ansible INFO| TASK [deploy_dockercommunity : Create staticfiles volume] *******************************************************************
+2025-05-14 19:30:25,745 p=9489 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:30:25,839 p=9489 u=root n=ansible INFO| TASK [deploy_dockercommunity : Create shared network] ***********************************************************************
+2025-05-14 19:30:32,419 p=9489 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:30:32,480 p=9489 u=root n=ansible INFO| TASK [deploy_dockercommunity : Deploy web container] ************************************************************************
+2025-05-14 19:30:42,095 p=9489 u=root n=ansible INFO| changed: [server_01]
+2025-05-14 19:30:42,141 p=9489 u=root n=ansible INFO| TASK [deploy_dockercommunity : Deploy nginx container] **********************************************************************
+2025-05-14 19:30:50,119 p=9489 u=root n=ansible INFO| changed: [server_01]
+2025-05-14 19:30:50,186 p=9489 u=root n=ansible INFO| PLAY RECAP ******************************************************************************************************************
+2025-05-14 19:30:50,187 p=9489 u=root n=ansible INFO| server_01                  : ok=7    changed=3    unreachable=0    failed=0    skipped=10   rescued=0    ignored=0   
+2025-05-14 19:34:43,702 p=10346 u=root n=ansible INFO| PLAY [Apply selected roles] *************************************************************************************************
+2025-05-14 19:34:43,765 p=10346 u=root n=ansible INFO| TASK [Gathering Facts] ******************************************************************************************************
+2025-05-14 19:34:54,979 p=10346 u=root n=ansible WARNING| [WARNING]: Platform linux on host server_01 is using the discovered Python interpreter at /usr/bin/python3.11, but future
+installation of another Python interpreter could change the meaning of that path. See https://docs.ansible.com/ansible-
+core/2.18/reference_appendices/interpreter_discovery.html for more information.
+
+2025-05-14 19:34:54,979 p=10346 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:34:55,021 p=10346 u=root n=ansible INFO| TASK [docker_install : Add Docker GPG key (Debian/Ubuntu)] ******************************************************************
+2025-05-14 19:34:55,060 p=10346 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:34:55,109 p=10346 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (Debian/Ubuntu)] ***************************************************************
+2025-05-14 19:34:55,145 p=10346 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:34:55,193 p=10346 u=root n=ansible INFO| TASK [docker_install : Install Docker (Debian/Ubuntu)] **********************************************************************
+2025-05-14 19:34:55,231 p=10346 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:34:55,285 p=10346 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (CentOS)] **********************************************************************
+2025-05-14 19:34:55,324 p=10346 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:34:55,380 p=10346 u=root n=ansible INFO| TASK [docker_install : Install Docker (CentOS)] *****************************************************************************
+2025-05-14 19:34:55,426 p=10346 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:34:55,481 p=10346 u=root n=ansible INFO| TASK [docker_install : Ensure Docker service is started and enabled] ********************************************************
+2025-05-14 19:34:55,520 p=10346 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:34:55,568 p=10346 u=root n=ansible INFO| TASK [docker_install : Add user to docker group (optional)] *****************************************************************
+2025-05-14 19:34:55,606 p=10346 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:34:55,701 p=10346 u=root n=ansible INFO| TASK [docker_compose : Get ansible user home directory] *********************************************************************
+2025-05-14 19:34:55,759 p=10346 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:34:55,814 p=10346 u=root n=ansible INFO| TASK [docker_compose : Copy docker-compose.yml to home directory] ***********************************************************
+2025-05-14 19:35:04,791 p=10346 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:35:04,847 p=10346 u=root n=ansible INFO| TASK [docker_compose : Copy nginx.conf to remote server] ********************************************************************
+2025-05-14 19:35:13,044 p=10346 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:35:13,123 p=10346 u=root n=ansible INFO| TASK [docker_compose : Run Docker Compose from home directory] **************************************************************
+2025-05-14 19:35:18,749 p=10346 u=root n=ansible INFO| fatal: [server_01]: FAILED! => {"changed": true, "cmd": ["docker", "compose", "up", "-d"], "delta": "0:00:00.223970", "end": "2025-05-14 19:35:17.933055", "msg": "non-zero return code", "rc": 15, "start": "2025-05-14 19:35:17.709085", "stderr": "empty compose file", "stderr_lines": ["empty compose file"], "stdout": "", "stdout_lines": []}
+2025-05-14 19:35:18,752 p=10346 u=root n=ansible INFO| PLAY RECAP ******************************************************************************************************************
+2025-05-14 19:35:18,753 p=10346 u=root n=ansible INFO| server_01                  : ok=4    changed=0    unreachable=0    failed=1    skipped=7    rescued=0    ignored=0   
+2025-05-14 19:38:29,527 p=10758 u=root n=ansible INFO| PLAY [Apply selected roles] ****************************************************************************************
+2025-05-14 19:38:29,590 p=10758 u=root n=ansible INFO| TASK [Gathering Facts] *********************************************************************************************
+2025-05-14 19:38:40,984 p=10758 u=root n=ansible WARNING| [WARNING]: Platform linux on host server_01 is using the discovered Python interpreter at /usr/bin/python3.11, but
+future installation of another Python interpreter could change the meaning of that path. See
+https://docs.ansible.com/ansible-core/2.18/reference_appendices/interpreter_discovery.html for more information.
+
+2025-05-14 19:38:40,985 p=10758 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:38:41,027 p=10758 u=root n=ansible INFO| TASK [docker_install : Add Docker GPG key (Debian/Ubuntu)] *********************************************************
+2025-05-14 19:38:41,070 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:38:41,123 p=10758 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (Debian/Ubuntu)] ******************************************************
+2025-05-14 19:38:41,158 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:38:41,209 p=10758 u=root n=ansible INFO| TASK [docker_install : Install Docker (Debian/Ubuntu)] *************************************************************
+2025-05-14 19:38:41,249 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:38:41,302 p=10758 u=root n=ansible INFO| TASK [docker_install : Add Docker repository (CentOS)] *************************************************************
+2025-05-14 19:38:41,349 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:38:41,404 p=10758 u=root n=ansible INFO| TASK [docker_install : Install Docker (CentOS)] ********************************************************************
+2025-05-14 19:38:41,439 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:38:41,491 p=10758 u=root n=ansible INFO| TASK [docker_install : Ensure Docker service is started and enabled] ***********************************************
+2025-05-14 19:38:41,533 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:38:41,588 p=10758 u=root n=ansible INFO| TASK [docker_install : Add user to docker group (optional)] ********************************************************
+2025-05-14 19:38:41,625 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:38:41,729 p=10758 u=root n=ansible INFO| TASK [docker_compose : Get ansible user home directory] ************************************************************
+2025-05-14 19:38:41,785 p=10758 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:38:41,844 p=10758 u=root n=ansible INFO| TASK [docker_compose : Copy docker-compose.yml to home directory] **************************************************
+2025-05-14 19:38:52,818 p=10758 u=root n=ansible INFO| changed: [server_01]
+2025-05-14 19:38:52,870 p=10758 u=root n=ansible INFO| TASK [docker_compose : Copy nginx.conf to remote server] ***********************************************************
+2025-05-14 19:39:01,928 p=10758 u=root n=ansible INFO| ok: [server_01]
+2025-05-14 19:39:01,978 p=10758 u=root n=ansible INFO| TASK [docker_compose : Run Docker Compose from home directory] *****************************************************
+2025-05-14 19:39:10,619 p=10758 u=root n=ansible INFO| changed: [server_01]
+2025-05-14 19:39:10,734 p=10758 u=root n=ansible INFO| TASK [deploy_dockercommunity : Get host's primary IP address] ******************************************************
+2025-05-14 19:39:10,775 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:39:10,834 p=10758 u=root n=ansible INFO| TASK [deploy_dockercommunity : Copy nginx.conf to remote server] ***************************************************
+2025-05-14 19:39:10,876 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:39:10,924 p=10758 u=root n=ansible INFO| TASK [deploy_dockercommunity : Create staticfiles volume] **********************************************************
+2025-05-14 19:39:10,960 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:39:11,012 p=10758 u=root n=ansible INFO| TASK [deploy_dockercommunity : Create shared network] **************************************************************
+2025-05-14 19:39:11,054 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:39:11,114 p=10758 u=root n=ansible INFO| TASK [deploy_dockercommunity : Deploy web container] ***************************************************************
+2025-05-14 19:39:11,155 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:39:11,210 p=10758 u=root n=ansible INFO| TASK [deploy_dockercommunity : Deploy nginx container] *************************************************************
+2025-05-14 19:39:11,251 p=10758 u=root n=ansible INFO| skipping: [server_01]
+2025-05-14 19:39:11,314 p=10758 u=root n=ansible INFO| PLAY RECAP *********************************************************************************************************
+2025-05-14 19:39:11,314 p=10758 u=root n=ansible INFO| server_01                  : ok=5    changed=2    unreachable=0    failed=0    skipped=13   rescued=0    ignored=0   

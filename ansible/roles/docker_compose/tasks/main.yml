@@ -8,6 +8,11 @@
   ansible.builtin.copy:
     src: files/docker-compose.yml
     dest: "{{ ansible_home }}/docker-compose.yml"
+- name: Copy nginx.conf to remote server
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../nginx/nginx.conf"  # Local path relative to playbook
+    dest: "{{ ansible_home }}/nginx.conf"
+    mode: '0644'
 
 - name: Run Docker Compose from home directory
   ansible.builtin.command: "docker compose up -d"
