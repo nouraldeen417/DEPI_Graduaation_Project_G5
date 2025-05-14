@@ -150,7 +150,7 @@ def onprem = [
             credentialsId: "${env.CREDENTIALS_ONPREM_SERVER}", 
             extraVars: [
                 selected_roles: 'deploy_dockercommunity',
-                IMAGE_TAG: "${IMAGE_TAG}"
+                build_number: "${IMAGE_TAG}"
             ]
         )
     
