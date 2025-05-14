@@ -5,7 +5,7 @@
   become_method: sudo
   vars:
     ansible_ssh_common_args: '-o StrictHostKeyChecking=accept-new'  # Accept new SSH keys automatically
-    nginx_file: "{{ playbook_dir }}/../nginx/nginx.conf"  # Path to the external file
+    nginx_file_path: "{{ playbook_dir }}/../nginx"  # Path to the external file
 
 
   roles:
