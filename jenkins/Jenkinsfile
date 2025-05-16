@@ -111,7 +111,7 @@ def aws = [
             credentialsId: "${env.CREDENTIALS_AWS_SSH}", // Leave empty since we’re using a dynamic key
             extraVars: [
                 selected_roles: 'deploy_dockercommunity',
-                IMAGE_TAG: "${IMAGE_TAG}"
+                build_number: "${IMAGE_TAG}"
                 // ansible_ssh_private_key_file: '.ssh/ssh_key.pem'
             ]
         )

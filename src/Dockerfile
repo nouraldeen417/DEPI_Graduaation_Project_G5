@@ -10,7 +10,7 @@ WORKDIR /app
 # Copy the requirements file into the container
 COPY . .
 
-# Install any needed packages specified in requirements.txt
+# Install any needed packages specified in requirements.txt && generate static files to served with nginx
 RUN pip install --no-cache-dir -r requirements.txt \
     && python djangoapp/manage.py collectstatic --noinput  
 
