@@ -26,6 +26,7 @@ def Pipeline_Flags = [
     DEPLOY_K8S: true, // Deploy to Kubernetes if true
     DEPLOY_AWS: true, // Deploy to AWS if true
     DEPLOY_ONPREM: true, // Deploy to on-premises if true
+    
 ]
 
 return [
