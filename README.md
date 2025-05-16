@@ -63,7 +63,6 @@ Deployment target is selected through Jenkins parameters or Git branch strategy.
 
 2. **Remote VM**
 
-
    * SSH-based deployment using Ansible playbooks
 
 3. **Kubernetes Cluster**
